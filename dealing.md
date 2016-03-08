@@ -39,7 +39,7 @@ Here's how it works to actually play the game. What should happen is that everyo
 	Here's how we do that in a p2p way:
 
 1. everyone gives a facedown card to the judge
-		Everyone picks a card, and encrypts it with the judge's public key.
+		Everyone picks a card, and encrypts it with the judge's public key. (add random padding to card before encrypting to prevent fingerprinting attacks)
 		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
