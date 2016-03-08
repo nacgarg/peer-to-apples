@@ -1,48 +1,50 @@
+# Random Dealing
 Everyone generates a RSA private key.
 Everyone submits their RSA public key
 Their ID is the hash of their public key.
-grouprandom = hash(everyone's ID, sorted from least to greatest)
-localRandom=hash(groupRandom + my ID)
+`grouprandom = hash #everyone's ID, sorted from least to greatest`
+
+`localRandom = hash(groupRandom + my ID)`
 
 
 Then in order to prevent duplicates, we split up the deck into numPlayers segments. Segments are not guaranteed to be of equal length. 
 
 This is how you figure out what subdeck a given cardIndex goes into. 
-whoCanDraw(cardIndex)=hash(cardIndex + groupRandom) % numPlayers
+`whoCanDraw(cardIndex)=hash(cardIndex + groupRandom) % numPlayers`
 Now every player has a list of cards that they could draw (called a subdeck)
 
 
-myRandom[i] is selected randomly, doesn't matter
-cards[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength
+`myRandom[i]` is selected randomly, doesn't matter
+`cards[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
 
 
-submit merkle tree root of cards[0...n] as my hand's hash
-
-
-
-
-In order to prove that I really have cards[i], I have to provide myRandom[i], then others can verify that I calculated cards[i] correctly. Then I need to prove that that is a part of the merkle tree root, which I do with a normal merkle proof.
-So basically I need to prove that I calculated cards[i] correctly, as well as that cards[i] is a part of my hand.
+submit merkle tree root of `cards[0...n]` as my hand's hash
 
 
 
 
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`, then others can verify that I calculated `cards[i]` correctly. Then I need to prove that that is a part of the merkle tree root, which I do with a normal merkle proof.
+So basically I need to prove that I calculated `cards[i]` correctly, as well as that `cards[i]` is a part of my hand.
 
-	Here's how it works to actually play the game. What happens is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
+
+
+-----
+
+Here's how it works to actually play the game. What happens is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
 	This is made easier by the fact that there are no duplicate cards.
 	Here's how we do that in a p2p way:
 
-	STEP 1: everyone gives a facedown card to the judge
+* STEP 1: everyone gives a facedown card to the judge
 		Everyone picks a card, and encrypts it with the judge's public key.
 		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
 
-	STEP 2: judge flips them over and picks one
+* STEP 2: judge flips them over and picks one
 		Judge decrypts cards with its private key. User picks one.
 		Judge signs the decision with its private key, and sends to everyone.
 
-	STEP 3: person who submitted winning cards claims winnings
+* STEP 3: person who submitted winning cards claims winnings
 		This is easy: this person generates the merkle/hash proof discussed earlier and gives it to everyone. 
 		Everyone agrees that that person won by verifying the proof.
 
