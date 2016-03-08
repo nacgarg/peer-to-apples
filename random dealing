@@ -1,0 +1,14 @@
+Everyone submits a random number.
+their ID is the hash of their random number.
+grouprandom = hash(everyone's ID, sorted from least to greatest)
+localRandom=hash(groupRandom + my ID)
+
+
+
+
+cards[i]=hash(localRandom + myRandom[i]) % deckLength
+
+submit merkle tree of cards[0...n]
+
+
+in order to prove that I really have cards[i], I have to provide myRandom[i], then others can verify that cards[i]=hash(localRandom + myRandom[i]) % deckLength
