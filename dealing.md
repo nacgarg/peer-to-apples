@@ -23,12 +23,12 @@ Then each player selects `n` cards from their segment to be their hand.
 First they select random numbers `myRandom[0...n]`. They keep these secret.
 Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
 
-Now that each player knows what cards are in their hand, they construct a merkle tree where the leaf nodes are the card indexes in their hand. Each player submits the merkle root of their hand, signed with their private key. (the signed part is optional, idk)
+Now that each player knows what cards are in their hand, they need to "encrypt" and declare their hashed hand.
+They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`.
 
 
 The point of all this is so that each player has a secret set of cards in their hand, but at any point can prove that a given card is in their hand.
-In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`, then others can verify that I calculated `cards[i]` correctly (using the equation above). Then I need to prove that that is a part of the merkle tree root, which I do with a normal merkle proof.
-So basically I need to prove that I calculated `cards[i]` correctly, as well as that `cards[i]` is a part of my hand.
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `otherRandomNumbers[i]`. Then others can verify `hash(localRandom + myRandom[i] + i) = cards[i]` and that `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
 
 
 
