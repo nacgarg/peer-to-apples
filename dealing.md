@@ -19,24 +19,22 @@ Here's how you do this:
 
 Now every player has a list of cards that they could draw (called a subdeck)
 
+Then each player selects `n` cards from their segment to be their hand.
+First they select random numbers `myRandom[0...n]`. They keep these secret.
+Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
 
-`myRandom[i]` is selected randomly, doesn't matter
-`cards[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
-
-
-submit merkle tree root of `cards[0...n]` as my hand's hash
-
+Now that each player knows what cards are in their hand, they construct a merkle tree where the leaf nodes are the card indexes in their hand. Each player submits the merkle root of their hand, signed with their private key. (the signed part is optional, idk)
 
 
-
-In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`, then others can verify that I calculated `cards[i]` correctly. Then I need to prove that that is a part of the merkle tree root, which I do with a normal merkle proof.
+The point of all this is so that each player has a secret set of cards in their hand, but at any point can prove that a given card is in their hand.
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`, then others can verify that I calculated `cards[i]` correctly (using the equation above). Then I need to prove that that is a part of the merkle tree root, which I do with a normal merkle proof.
 So basically I need to prove that I calculated `cards[i]` correctly, as well as that `cards[i]` is a part of my hand.
 
 
 
 -----
 
-Here's how it works to actually play the game. What happens is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
+Here's how it works to actually play the game. What should happen is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
 	This is made easier by the fact that there are no duplicate cards.
 	Here's how we do that in a p2p way:
 
