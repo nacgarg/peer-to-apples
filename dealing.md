@@ -38,17 +38,15 @@ Here's how it works to actually play the game. What should happen is that everyo
 	This is made easier by the fact that there are no duplicate cards.
 	Here's how we do that in a p2p way:
 
-* STEP 1: everyone gives a facedown card to the judge
+1. everyone gives a facedown card to the judge
 		Everyone picks a card, and encrypts it with the judge's public key.
 		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
-
-* STEP 2: judge flips them over and picks one
+* judge flips them over and picks one
 		Judge decrypts cards with its private key. User picks one.
 		Judge signs the decision with its private key, and sends to everyone.
-
-* STEP 3: person who submitted winning cards claims winnings
+* person who submitted winning cards claims winnings
 		This is easy: this person generates the merkle/hash proof discussed earlier and gives it to everyone. 
 		Everyone agrees that that person won by verifying the proof.
 
