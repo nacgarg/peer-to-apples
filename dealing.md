@@ -1,9 +1,11 @@
 # Random Dealing
-Everyone generates a RSA private key.
-Everyone submits their RSA public key
-Their ID is the hash of their public key.
-`grouprandom = hash(everyone's ID, sorted from least to greatest)`
+1. Everyone generates a RSA private key.
+3. Everyone submits their RSA public key
+* Their ID is the hash of their public key.
 
+Then, to facilitate random number generation that's agreed on by the group, the group generates a shared random number
+`grouprandom = hash(everyone's ID, sorted from least to greatest)`
+Then each person generates a random number that is dependant on the group random number but is different for each person
 `localRandom = hash(groupRandom + my ID)`
 
 
