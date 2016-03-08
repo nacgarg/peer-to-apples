@@ -3,12 +3,14 @@ their ID is the hash of their random number.
 grouprandom = hash(everyone's ID, sorted from least to greatest)
 localRandom=hash(groupRandom + my ID)
 
+whoCanDraw(cardIndex)=hash(cardIndex + groupRandom) % numPlayers
+Now every player has a list of cards that they could draw
 
 
+myRandom[i] is selected randomly, doesn't matter
+cards[i]=hash(localRandom + myRandom[i] + i) % myDeckLength
 
-cards[i]=hash(localRandom + myRandom[i]) % deckLength
-
-submit merkle tree of cards[0...n]
+submit merkle tree of cards[0...n] as my hand's hash
 
 
-in order to prove that I really have cards[i], I have to provide myRandom[i], then others can verify that cards[i]=hash(localRandom + myRandom[i]) % deckLength
+in order to prove that I really have cards[i], I have to provide myRandom[i], then others can verify that they calculated cards[i] correctly
