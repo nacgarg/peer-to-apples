@@ -2,7 +2,7 @@
 Everyone generates a RSA private key.
 Everyone submits their RSA public key
 Their ID is the hash of their public key.
-`grouprandom = hash #everyone's ID, sorted from least to greatest`
+`grouprandom = hash(everyone's ID, sorted from least to greatest)`
 
 `localRandom = hash(groupRandom + my ID)`
 
