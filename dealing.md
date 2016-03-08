@@ -4,15 +4,19 @@
 * Their ID is the hash of their public key.
 
 Then, to facilitate random number generation that's agreed on by the group, the group generates a shared random number
-`grouprandom = hash(everyone's ID, sorted from least to greatest)`
+`groupRandom = hash(everyone's ID, sorted from least to greatest)`
 Then each person generates a random number that is dependant on the group random number but is different for each person
 `localRandom = hash(groupRandom + my ID)`
 
 
-Then in order to prevent duplicates, we split up the deck into numPlayers segments. Segments are not guaranteed to be of equal length. 
+Then in order to prevent duplicates, we split up the deck into numPlayers segments. 
+Here's how you do this:
 
-This is how you figure out what subdeck a given cardIndex goes into. 
-`whoCanDraw(cardIndex)=hash(cardIndex + groupRandom) % numPlayers`
+1. Make a random number generator, seeded by the string `groupRandom + "whiteCards"`
+2. Use that random number generator to shuffle the white cards
+3. Split this deck into `numPlayers` equal segments
+4. Assign each player a segment, going in order of player ID from least to greatest
+
 Now every player has a list of cards that they could draw (called a subdeck)
 
 
