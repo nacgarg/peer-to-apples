@@ -33,6 +33,9 @@ class Game
 	def has_deck
 		!@deck.nil?
 	end
+	def deck
+		@deck
+	end
 	def get_deck_hash
 		@deck.get_deck 
 	end
