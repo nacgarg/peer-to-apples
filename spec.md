@@ -30,7 +30,7 @@ Messages (not including handshake):
 	* Consists of `hashedCard[0...n]`
 	* This is sent to every peer from the person who is declaring their hand
 * PlayCard
-	* The card index that is being played, plus a random nonce, encrypted with the current judge's private key
+	* The card index that is being played, plus a random nonce, encrypted with the current judge's public key
 	* Once received by someone who isn't the judge, forward to three random people (which may include the judge)
 	* Once received by the judge, store it in a list. Once all encrypted cards are received, ask the user which card they choose
 	* Judge can ensure there are no duplicate plays by checking the deck segments and allowing only one card played per deck segment. If judge receives a second card from the same deck segment, judge will ignore the second one and only pay attention to the first.
