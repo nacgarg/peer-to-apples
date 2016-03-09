@@ -33,11 +33,11 @@ First they select random numbers `myRandom[0...n]`. They keep these secret.
 Here's how they calculate the cardIndex of card i of their hand: `cards[i]=mySubDeck[hash(localRandomSeed + myRandom[i] + i) % mySubDeckLength]` **this hash needs to use a different algorithm that is designed to be slow, like bcrypt, to prevent brute forcing to get a certain card**
 
 Now that each player knows what cards are in their hand, they need to "encrypt" and declare their hashed hand.
-They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`. Everyone broadcasts their hashed hand, signed by their private key, to everyone.  (not sure about the signed by the private key part, might be unnecessary)
+They generate more random numbers `cardNonce[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + cardNonce[i])`. Their encrypted hand is composed of `hashedCard[0...n]`. Everyone broadcasts their hashed hand, signed by their private key, to everyone.  (not sure about the signed by the private key part, might be unnecessary)
 
 
 The point of all this is so that each player has a secret set of cards in their hand, **but at any point can prove that a given card is in their hand**.
-In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `otherRandomNumbers[i]`. Then others can verify `mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]=cards[i]` and that `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `cardNonce[i]`. Then others can verify `mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]=cards[i]` and that `hashedCard[i]=hash(cards[i] + cardNonce[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
 
 
 
@@ -48,7 +48,7 @@ In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`
 	Here's how we do that in a p2p way:
 
 1. **everyone gives a facedown card to the judge**
-Everyone picks a card, and encrypts it with the judge's public key. (add random padding that judge will ignore to the card before encrypting to prevent fingerprinting attacks)
+Everyone picks a card, and encrypts it with the judge's public key. (add random nonce that judge will ignore to the card before encrypting to prevent fingerprinting attacks)
 Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 	Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
