@@ -37,7 +37,7 @@ They generate more random numbers `cardNonce[0...n]`. Then they calculate `hashe
 
 
 The point of all this is so that each player has a secret set of cards in their hand, **but at any point can prove that a given card is in their hand**.
-In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `cardNonce[i]`. Then others can verify `mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]=cards[i]` and that `hashedCard[i]=hash(cards[i] + cardNonce[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `cardNonce[i]`. Then others can verify `mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]=cards[i]` and that `hashedCard[i]=hash(cards[i] + cardNonce[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. Verifiers know what `i` is because when you announced your hand, you did it in order from `i=0` to `i=n-1`, so they can just lookup `hashedCard` in that array.
 
 
 
@@ -70,5 +70,5 @@ The order of the black cards (which is public, like the order of the judges) is 
 
 
 
-Now people need to draw another card... (to be continued)
+**Everyone draws another white card to keep their hand size at `n`**
 Well at the end of every round, everyone knows which `hashedCard` they have used up, so now everyone knows the remaining `hashedCard`s in everyone's hand. So basically everyone draws another card in the exact same way as detailed above and broadcasts the new `hashedCard`.
