@@ -16,7 +16,7 @@ end
 class WhiteCard < Card
 	def initialize(text)
 		@text = text
-		@type = :black
+		@type = :white
 	end
 end
 
