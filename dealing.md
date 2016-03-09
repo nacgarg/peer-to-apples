@@ -9,7 +9,8 @@ Then each person generates a random number that is dependant on the group random
 `localRandom = hash(groupRandom + my ID)`
 
 
-Then in order to prevent duplicates, we split up the deck into numPlayers segments. 
+Then in order to prevent duplicates, we split up the deck into numPlayers segments.
+
 Here's how you do this:
 
 1. Make a random number generator, seeded by the string `groupRandom + "whiteCards"`
@@ -19,7 +20,7 @@ Here's how you do this:
 
 Now every player has a list of cards that they could draw (called a subdeck)
 
-Then each player selects `n` cards from their segment to be their hand.
+**Then each player selects `n` cards from their segment to be their hand.**
 First they select random numbers `myRandom[0...n]`. They keep these secret.
 Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
 
@@ -27,26 +28,26 @@ Now that each player knows what cards are in their hand, they need to "encrypt" 
 They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`.
 
 
-The point of all this is so that each player has a secret set of cards in their hand, but at any point can prove that a given card is in their hand.
+The point of all this is so that each player has a secret set of cards in their hand, **but at any point can prove that a given card is in their hand**.
 In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `otherRandomNumbers[i]`. Then others can verify `hash(localRandom + myRandom[i] + i) = cards[i]` and that `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
 
 
 
 -----
 
-Here's how it works to actually play the game. What should happen is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
+**Here's how it works to actually play the game.** What should happen is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
 	This is made easier by the fact that there are no duplicate cards.
 	Here's how we do that in a p2p way:
 
-1. everyone gives a facedown card to the judge
+1. **everyone gives a facedown card to the judge**
 		Everyone picks a card, and encrypts it with the judge's public key. (add random padding to card before encrypting to prevent fingerprinting attacks)
 		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
-* judge flips them over and picks one
+* **judge flips them over and picks one**
 		Judge decrypts cards with its private key. User picks one.
 		Judge signs the decision with its private key, and sends to everyone.
-* person who submitted winning cards claims winnings
+* **person who submitted winning cards claims winnings**
 		This is easy: this person generates the merkle/hash proof discussed earlier and gives it to everyone. 
 		Everyone agrees that that person won by verifying the proof.
 
