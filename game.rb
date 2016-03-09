@@ -33,7 +33,9 @@ class Game
 	def has_deck
 		!@deck.nil?
 	end
-
+	def get_deck_hash
+		@deck.get_deck 
+	end
 	def self.instance
 		@@instance ||= Game.new
 	end
