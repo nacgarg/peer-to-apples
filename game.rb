@@ -285,6 +285,19 @@ class Peer < EventMachine::Connection
 		send_action :peers, res
 	end
 
+	def received_peers(data)
+		puts "Received peers #{data}"
+		data.split(",").each do |ip|
+			puts "should connect to #{ip}"
+			if @@peers.any? { |peer| peer.ip_address == ip}
+				puts "already connected"
+			else
+				puts "not connected yet"
+			end
+
+		end
+	end
+
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
@@ -337,6 +350,8 @@ class Peer < EventMachine::Connection
 			send_deck
 		when :has_deck
 			peer_has_deck
+		when :peers
+			received_peers incoming[:data]
 		end
 
 		
@@ -344,10 +359,13 @@ class Peer < EventMachine::Connection
 end
 
 Game.instance # initialize everything
+def connect_to_peer(ip)
+	EM::connect ip, 54484, Peer if ip
+end
 
 EventMachine.run do
 	EM::start_server '0.0.0.0', Peer::GAME_PORT, Peer
-	EM::connect Game.instance.initial_peer, Peer::GAME_PORT, Peer if Game.instance.has_initial_peer
+	connect_to_peer(Game.instance.initial_peer)
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 end
