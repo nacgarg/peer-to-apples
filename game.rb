@@ -377,17 +377,13 @@ class Peer < EventMachine::Connection
 		if check_ready
 			puts "LETS GO"
 		else
-			puts "not ready =("
+			puts "not all peers are ready, or I'm not ready =("
 		end
 	end
 	def self.check_ready
-		puts "Checking readyness"
 		return false unless @@me_ready
-		puts "I am ready"
 		return false if @@peers.length==0
-		puts "Has peers"
 		return false if @@peers.any? {|peer| !peer.peer_is_ready_for_game_to_start}
-		puts "All peers ready"
 		return true
 	end
 	def self.has_peers
@@ -410,7 +406,7 @@ EventMachine.run do
 			puts "waiting"
 			STDIN.gets.strip
 			if Peer.has_peers
-				puts "seting ready"
+				puts "letting people know that I am ready now"
 				Peer.set_ready
 				return
 			else
