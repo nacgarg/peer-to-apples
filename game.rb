@@ -59,7 +59,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def hashed_key_hex
-		(hashed_key.map { |b| b.to_s(16) }).join('')
+		hashed_key.map { |b| b.to_s(16) }.join
 	end
 
 	def identifying_name
@@ -77,6 +77,15 @@ class Peer < EventMachine::Connection
 
 	def ready
 		public_key_known && nickname_known
+	end
+
+	@@accepting_peers = true
+	def self.accepting_peers?
+		@@accepting_peers
+	end
+
+	def self.accepting_peers?=(value)
+		@@accepting_peers = value
 	end
 
 	# EVENTMACHINE HANDLERS
@@ -103,11 +112,16 @@ class Peer < EventMachine::Connection
 		}
 	end
 
-
 	def post_init
 		if !identify_peer # stores peer info in @peer_info
 			puts 'Cannot identify peer -- rejecting peer connection.'
 			reject_connection 'cannot identify peer'
+			return
+		end
+
+		unless Peer.accepting_peers?
+			puts "Peer candidate #{peer_info_s} denied admission -- not currently accepting peers."
+			reject_connection 'not currently accepting peers'
 			return
 		end
 
