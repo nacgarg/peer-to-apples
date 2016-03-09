@@ -84,7 +84,7 @@ class Peer < EventMachine::Connection
 		@@accepting_peers
 	end
 
-	def self.accepting_peers?=(value)
+	def self.accepting_peers=(value)
 		@@accepting_peers = value
 	end
 
