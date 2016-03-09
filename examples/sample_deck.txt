@@ -1,0 +1,10 @@
+# Example deck
+# Use an underscore ( _ ) to designate the blank space.
+
+black_cards
+	_ made GitHub go down yesterday.
+	_, coming soon to theatres near you.
+
+white_cards
+	peer-to-apples
+	blah blah
