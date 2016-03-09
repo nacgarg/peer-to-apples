@@ -150,8 +150,6 @@ class Peer < EventMachine::Connection
 			return
 		end
 
-		@read_status = :idle
-
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
 
@@ -224,6 +222,8 @@ class Peer < EventMachine::Connection
 		puts "#{peer_info_s} --> #{line}"
 	end
 end
+
+class ServerPeer < Peer
 
 Game.instance # initialize everything
 
