@@ -17,8 +17,10 @@ class Game
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
 		@local_nickname = request_nickname
-		@deck=Deck.new
-		@deck.load_from_file "examples/sample_deck.txt"
+		if(!ARGV[1].nil?)
+			@deck=Deck.new
+			@deck.load_from_file ARGV[1]
+		end
 	end
 
 	attr_reader :local_nickname
@@ -29,7 +31,7 @@ class Game
 
 	def request_nickname # bad hack
 		print "Nickname? "
-		gets.strip
+		STDIN.gets.strip
 	end
 
 	def has_deck
@@ -54,7 +56,7 @@ end
 class Peer < EventMachine::Connection
 	include EM::P::LineProtocol
 
-	GAME_PORT = 54484 # class constant
+	GAME_PORT = ARGV[0].nil? ? 54484 : ARGV[0].to_i# class constant
 	@@peers = []
 
 	def self.hash_key(key)
@@ -138,8 +140,8 @@ class Peer < EventMachine::Connection
 	end
 
 	def send_action(action, data)
-		msg = "#{action.to_s.upcase}"
-		msg += ": #{data.to_s}" unless data.nil?
+		msg = "#{action.to_s.upcase}: "
+		msg += "#{data.to_s}" unless data.nil?
 		send_line msg
 	end
 
@@ -169,7 +171,7 @@ class Peer < EventMachine::Connection
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
-
+		sleep 1
 		send_action :gameserver_release, Game::SERVER_RELEASE
 	end
 
@@ -288,7 +290,7 @@ class Peer < EventMachine::Connection
 		incoming = parse_action line
 		return if incoming.nil?
 		puts "i => #{incoming}"
-
+		puts "#{peer_info_s} --> #{line}"
 		case incoming[:action]
 		when :public_key
 			read_public_key incoming[:data]
@@ -306,7 +308,7 @@ class Peer < EventMachine::Connection
 			peer_has_deck
 		end
 
-		puts "#{peer_info_s} --> #{line}"
+		
 	end
 end
 
