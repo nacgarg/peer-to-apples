@@ -288,11 +288,12 @@ class Peer < EventMachine::Connection
 	def received_peers(data)
 		puts "Received peers #{data}"
 		data.split(",").each do |ip|
-			puts "should connect to #{ip}"
+			puts "peer: #{ip}"
 			if @@peers.any? { |peer| peer.ip_address == ip}
 				puts "already connected"
 			else
 				puts "not connected yet"
+				connect_to_peer ip
 			end
 
 		end
