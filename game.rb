@@ -390,7 +390,9 @@ class Peer < EventMachine::Connection
 		puts "All peers ready"
 		return true
 	end
-
+	def self.has_peers
+		@@peers.length!=0
+	end
 end
 
 Game.instance # initialize everything
@@ -404,10 +406,17 @@ EventMachine.run do
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 	Thread.new do
-		puts "waiting"
-		STDIN.gets.strip
-		puts "seting ready"
-		Peer.set_ready
+		loop do
+			puts "waiting"
+			STDIN.gets.strip
+			if Peer.has_peers
+				puts "seting ready"
+				Peer.set_ready
+				return
+			else
+				puts "can't be ready, you don't have any peers"
+			end
+		end
 	end
 end
 
