@@ -202,8 +202,20 @@ class Peer < EventMachine::Connection
 		if !Game.instance.has_deck
 			return
 		end
-		#send_action :deck_hash, 
+		#send_action :deck_hash, Game.instance.get_deck_hash
 
+	end
+
+	def read_deck_hash(line)
+		if !Game.instance.has_deck
+			send_action :get_deck, nil
+			return
+		end
+		if line==Game.instance.get_deck_hash
+			send_action :has_deck, nil 
+		else
+			reject_connection 'already got a different deck from someone else'
+		end
 	end
 
 
@@ -249,6 +261,8 @@ class Peer < EventMachine::Connection
 			read_nickname incoming[:data]
 		when :gameserver_release
 			read_version incoming[:data]
+		when :deck_hash
+			read_deck_hash incoming[:data]
 		end
 
 		puts "#{peer_info_s} --> #{line}"
