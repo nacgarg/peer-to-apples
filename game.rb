@@ -188,7 +188,10 @@ class Peer < EventMachine::Connection
 			reject_connection 'bad public key'
 			return
 		end
-		reject_connection 'already has public key' if public_key_known
+		if public_key_known
+			reject_connection 'already has public key' 
+			return
+		end
 		send_action :received_public_key, nil
 		puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
 
@@ -210,8 +213,10 @@ class Peer < EventMachine::Connection
 			reject_connection 'bad nickname'
 			return
 		end
-		
-		reject_connection 'already has nickname' if nickname_known
+		if nickname_known
+			reject_connection 'already has nickname'
+			return
+		end
 
 
 		@nickname = data
