@@ -210,6 +210,7 @@ class Peer < EventMachine::Connection
 
 	def send_deck_info
 		if !Game.instance.has_deck
+			puts "doesn't have a deck, so not sending hash"
 			return
 		end
 		send_action :deck_hash, Game.instance.get_deck_hash
@@ -263,6 +264,7 @@ class Peer < EventMachine::Connection
 
 		@nickname = data
 		@read_status = :idle
+
 
 		send_deck_info if has_identified
 	end
