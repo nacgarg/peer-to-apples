@@ -14,24 +14,34 @@ class Game
 
 	def initialize
 		@peers = []
+		@initial_peer = request_input 'Initial Peer IP? ', false
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
-		@local_nickname = request_nickname
+		@local_nickname = request_input 'Nickname? ', true
 		if(!ARGV[1].nil?)
-			@deck=Deck.new
+			@deck = Deck.new
 			@deck.load_from_file ARGV[1]
 		end
 	end
 
 	attr_reader :local_nickname
+	attr_reader :initial_peer
+
+	def has_initial_peer
+		!@initial_peer.nil?
+	end
 
 	def local_public_key
 		@local_rsa.public_key
 	end
 
-	def request_nickname # bad hack
-		print "Nickname? "
-		STDIN.gets.strip
+	def request_input(prompt, required)
+		print "#{prompt} "
+		loop do
+			s = STDIN.gets.strip
+			return s unless s.empty?
+			return nil unless required
+		end
 	end
 
 	def has_deck
@@ -140,7 +150,7 @@ class Peer < EventMachine::Connection
 
 	def send_line(line)
 		send_data "#{line}\n"
-		puts "#{peer_info_s} TX #{line}"
+		puts "#{peer_info_s} <-- #{line}"
 	end
 
 	def send_action(action, data)
@@ -297,7 +307,7 @@ class Peer < EventMachine::Connection
 		incoming = parse_action line
 		return if incoming.nil?
 		puts "i => #{incoming}"
-		puts "#{peer_info_s} RX #{line}"
+		puts "#{peer_info_s} --> #{line}"
 		case incoming[:action]
 		when :public_key
 			read_public_key incoming[:data]
@@ -323,7 +333,7 @@ Game.instance # initialize everything
 
 EventMachine.run do
 	EM::start_server '0.0.0.0', Peer::GAME_PORT, Peer
-	#EM::connect "localhost", 54484, Peer
+	EM::connect Game.instance.initial_peer, Peer::GAME_PORT, Peer if Game.instance.has_initial_peer
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 end
