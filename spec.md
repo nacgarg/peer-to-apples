@@ -18,7 +18,7 @@ Then, the side that was listening for the connections sends hostnames of all pee
 4. **A -> B** _either_
 	* GetDeck
 	* IHaveThisDeck
-5. **B -> A** deck contents, if the last message was GetDeck
+5. **B -> A** if the last message was GetDeck, the contents of the deck
 6. **B -> A** hostnames of all peers on this game
 7. A connects to all these peers, and this same exchange will occur
 
