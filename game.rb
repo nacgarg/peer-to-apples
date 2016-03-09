@@ -183,6 +183,12 @@ class Peer < EventMachine::Connection
 	end
 
 	def post_init
+		unless Peer.accepting_peers?
+			puts "Peer candidate denied admission -- not currently accepting peers."
+			reject_connection 'not currently accepting peers'
+			return
+		end
+
 		if !identify_peer # stores peer info in @peer_info
 			@identification_attempts_left ||= 5
 			@identification_attempts_left -= 1
@@ -196,11 +202,7 @@ class Peer < EventMachine::Connection
 			return
 		end
 
-		unless Peer.accepting_peers?
-			puts "Peer candidate #{peer_info_s} denied admission -- not currently accepting peers."
-			reject_connection 'not currently accepting peers'
-			return
-		end
+		
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
@@ -375,7 +377,9 @@ class Peer < EventMachine::Connection
 	@@me_ready = false
 	def self.on_readiness_update
 		if check_ready
-			puts "LETS GO"
+			puts "EVERYONE IS READY, LETS GO"
+			@@accepting_peers=false
+			puts "No longer accepting new peers because game is in progress"
 		else
 			puts "not all peers are ready, or I'm not ready =("
 		end
