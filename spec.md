@@ -6,7 +6,7 @@ So basically when you join, you connect to everyone already on the network, and 
 When a connection is opened, the first data that is sent is the nickname and public key. This data is sent in both directions, but the client talks first.
 Then, the side that was listening for the connections sends hostnames of all peers it knows of to the side that instigated the connection.
 
-#Example connection
+#Example handshake
 **A:** the person who started the connection (sorta the "client")
 
 **B:** the person who was listening for this connection on a port (sorta the "server")
@@ -21,6 +21,27 @@ Then, the side that was listening for the connections sends hostnames of all pee
 5. **B -> A** if the last message was GetDeck, the contents of the deck
 6. **B -> A** hostnames of all peers on this game
 7. A connects to all these peers, and this same exchange will occur
+
+
+# Gameplay protocol
+Messages (not including handshake):
+
+* DeclareEncryptedHand
+	* Consists of `hashedCard[0...n]`
+	* This is sent to every peer from the person who is declaring their hand
+* PlayCard
+	* The card index that is being played, plus a random nonce, encrypted with the current judge's private key
+	* Once received by someone who isn't the judge, forward to three random people (which may include the judge)
+	* Once received by the judge, store it in a list. Once all encrypted cards are received, ask the user which card they choose
+* JudgeDecision
+	* Sent directly from the judge to all peers
+	* Contains all `cardIndex + nonce` payloads (these are the decrypted versions of the PlayCard messages sent around earlier)
+	* The card that won is first
+	* The person who won then sends a ProveCardInHand message
+* ProveCardInHand
+	* mechanics of this proof are discussed later
+	* The person who played the card that just won the JudgeDecision generates this message and sends it to all peers
+	* Once received, everyone agrees that this person won
 
 
 #Agreeing on a deck
