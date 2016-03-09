@@ -45,15 +45,16 @@ In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`
 	Here's how we do that in a p2p way:
 
 1. **everyone gives a facedown card to the judge**
-		Everyone picks a card, and encrypts it with the judge's public key. (add random padding that judge will ignore to the card before encrypting to prevent fingerprinting attacks)
-		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
-		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
+Everyone picks a card, and encrypts it with the judge's public key. (add random padding that judge will ignore to the card before encrypting to prevent fingerprinting attacks)
+Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
+	Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
 * **judge flips them over and picks one**
-		Judge decrypts cards with its private key. User picks one.
-		Judge signs the decision with its private key, and sends to everyone.
+		Judge decrypts cards with its private key. Judge picks one (accept user input).
+		Judge signs the decision with its private key, and sends to everyone.  
+* **Judge shows all cards to everyone, along with its decision** Judge broadcasts all the cards and the padding, so that everyone can verify that these were the real cards that were sent around. Displays to all the users the list of submitted cards, which one was theirs, and which one won. Verify judge's signature for who won
 * **person who submitted winning cards claims winnings**
-		This is easy: this person generates the merkle/hash proof discussed earlier and gives it to everyone. 
+		This is easy: this person generates the hash proof discussed earlier and gives it to everyone. 
 		Everyone agrees that that person won by verifying the proof.
 
 
