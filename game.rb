@@ -7,7 +7,6 @@ require 'socket'
 require 'openssl'
 require 'securerandom'
 
-require 'pry'
 
 require_relative 'deck.rb'
 
