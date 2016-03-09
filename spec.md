@@ -33,15 +33,20 @@ Messages (not including handshake):
 	* The card index that is being played, plus a random nonce, encrypted with the current judge's private key
 	* Once received by someone who isn't the judge, forward to three random people (which may include the judge)
 	* Once received by the judge, store it in a list. Once all encrypted cards are received, ask the user which card they choose
+	* Judge can ensure there are no duplicate plays by checking the deck segments and allowing only one card played per deck segment. If judge receives a second card from the same deck segment, judge will ignore the second one and only pay attention to the first.
 * JudgeDecision
 	* Sent directly from the judge to all peers
 	* Contains all `cardIndex + nonce` payloads (these are the decrypted versions of the PlayCard messages sent around earlier)
 	* The card that won is first
-	* The person who won then sends a ProveCardInHand message
+	* Everyone then sends a ProveCardInHand
 * ProveCardInHand
 	* mechanics of this proof are discussed later
-	* The person who played the card that just won the JudgeDecision generates this message and sends it to all peers
-	* Once received, everyone agrees that this person won
+	* Everyone generates this message after a JudgeDecision
+	* Once received, everyone agrees on who won
+	* Also once received, remove this hashedCard from their encryptedHand
+	* Once this message has been sent from everyone to everyone, everyone's encrypted hand is now size `n-1`
+* DeclareNewCard
+	* Draw another card from your deck segment and declare it to everyone. `i` increments as normal.
 
 
 #Agreeing on a deck
