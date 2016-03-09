@@ -7,7 +7,7 @@ require 'socket'
 require 'openssl'
 require 'securerandom'
 
-require_relative 'card.rb'
+require_relative 'deck.rb'
 
 class Game
 	SERVER_RELEASE = 'Apples-to-Peers 0.1'
