@@ -3,11 +3,16 @@ Everyone listens on the _apples to peers_ port, which is going to be a number. W
 
 So basically when you join, you connect to everyone already on the network, and then you start listening for connections from people who might join after you
 
-When a connection is opened, the first data that is sent is the nickname and public key. This data is sent in both directions.
+When a connection is opened, the first data that is sent is the nickname and public key. This data is sent in both directions, but the client talks first.
 Then, the side that was listening for the connections sends hostnames of all peers it knows of to the side that instigated the connection.
+
+
+#Agreeing on a deck
+When you connect, the person who you connect to tells you the hash of the deck they are using. If you don't already have a deck with that hash, you ask for it and the person you connected to provides it. 
+Decks are cached with the file name of `deck_#{deck_hash_in_hex}.yaml`.
 # Random Dealing
 1. Everyone generates a RSA private key.
-3. Everyone submits their RSA public key
+3. Everyone provides their RSA public key to all peers
 * Their ID is the hash of their public key.
 
 Then, to facilitate random number generation that's agreed on by the group, everyone in the group generates a shared random number:
