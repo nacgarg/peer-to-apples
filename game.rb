@@ -20,9 +20,10 @@ class Game
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
 		@local_nickname = request_input 'Nickname? ', true
-		if(!ARGV[1].nil?)
+		deckPath = request_input 'Path to deck? ',false
+		if !deckPath.nil?
 			@deck = Deck.new
-			@deck.load_from_file ARGV[1]
+			@deck.load_from_file deckPath
 		end
 	end
 
@@ -280,8 +281,8 @@ class Peer < EventMachine::Connection
 		#now we know that they have the same deck as us
 		#send them all our peers
 		
-		res = @@peers.map(&:ip_address).join ','
-		puts res
+		res = @@peers.select {|peer| peer != self }.map(&:ip_address).join ','
+		puts "Peers to send: #{res}"
 		send_action :peers, res
 	end
 
