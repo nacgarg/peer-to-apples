@@ -7,19 +7,19 @@ When a connection is opened, the first data that is sent is the nickname and pub
 Then, the side that was listening for the connections sends hostnames of all peers it knows of to the side that instigated the connection.
 
 #Example connection
-**A:** the person who started the connection
+**A:** the person who started the connection (sorta the "client")
 
-**B:** the person who was listening for this connection on a port
+**B:** the person who was listening for this connection on a port (sorta the "server")
 
 
-1. A->B A's nickname and public key
-2. B->A B's nickname and public key
-3. B->A hash of the deck that is being used in this game
-4. A->B _either_
+1. **A->B** A's nickname and public key
+2. **B->A** B's nickname and public key
+3. **B->A** hash of the deck that is being used in this game
+4. **A->B** _either_
 	* GetDeck
 	* IHaveThisDeck
-5. B->A deck contents, if the last message was GetDeck
-6. B->A hostnames of all peers on this game
+5. **B->A** deck contents, if the last message was GetDeck
+6. **B->A** hostnames of all peers on this game
 7. A connects to all these peers, and this same exchange will occur
 
 
