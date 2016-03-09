@@ -11,7 +11,7 @@ Then, the side that was listening for the connections sends hostnames of all pee
 
 **B:** the person who was listening for this connection on a port (sorta the "server")
 
-
+1. **B -> A** Game version
 1. **A -> B** A's nickname and public key
 2. **B -> A** B's nickname and public key
 3. **B -> A** hash of the deck that is being used in this game
