@@ -7,6 +7,7 @@ require 'socket'
 require 'openssl'
 require 'securerandom'
 
+
 require_relative 'deck.rb'
 
 class Game
@@ -14,24 +15,35 @@ class Game
 
 	def initialize
 		@peers = []
+		@initial_peer = request_input 'Initial Peer IP? ', false
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
-		@local_nickname = request_nickname
-		if(!ARGV[1].nil?)
-			@deck=Deck.new
-			@deck.load_from_file ARGV[1]
+		@local_nickname = request_input 'Nickname? ', true
+		deckPath = request_input 'Path to deck? ',false
+		if !deckPath.nil?
+			@deck = Deck.new
+			@deck.load_from_file deckPath
 		end
 	end
 
 	attr_reader :local_nickname
+	attr_reader :initial_peer
+
+	def has_initial_peer
+		!@initial_peer.nil?
+	end
 
 	def local_public_key
 		@local_rsa.public_key
 	end
 
-	def request_nickname # bad hack
-		print "Nickname? "
-		STDIN.gets.strip
+	def request_input(prompt, required)
+		print "#{prompt} "
+		loop do
+			s = STDIN.gets.strip
+			return s unless s.empty?
+			return nil unless required
+		end
 	end
 
 	def has_deck
@@ -73,13 +85,23 @@ class Peer < EventMachine::Connection
 
 	def identify_peer
 		pname = get_peername
-		return false if pname.nil?
+		if pname.nil?
+			@peer_info = { # store because get_peername doesn't work in `#unbind`
+				:port => :unknown,
+				:ip => :unknown
+			}
+			return false
+		end
 		port, ip = Socket.unpack_sockaddr_in(pname)
 		@peer_info = { # store because get_peername doesn't work in `#unbind`
 			:port => port,
 			:ip => ip
 		}
 		return true
+	end
+
+	def peer_is_ready_for_game_to_start
+		@ready.nil? ? false : @ready
 	end
 
 	def peer_info_s
@@ -140,7 +162,7 @@ class Peer < EventMachine::Connection
 
 	def send_line(line)
 		send_data "#{line}\n"
-		puts "#{peer_info_s} TX #{line}"
+		puts "#{peer_info_s} <-- #{line}"
 	end
 
 	def send_action(action, data)
@@ -161,22 +183,29 @@ class Peer < EventMachine::Connection
 	end
 
 	def post_init
+		
 		if !identify_peer # stores peer info in @peer_info
+			@identification_attempts_left ||= 5
+			@identification_attempts_left -= 1
+			if @identification_attempts_left > 0
+				puts "Couldn't identify peer... will try #{@identification_attempts_left} more times..."
+				EM.add_timer(0.3) { post_init }
+				return
+			end
 			puts 'Cannot identify peer -- rejecting peer connection.'
 			reject_connection 'cannot identify peer'
 			return
 		end
 
 		unless Peer.accepting_peers?
-			puts "Peer candidate #{peer_info_s} denied admission -- not currently accepting peers."
+			puts "Peer candidate denied admission -- not currently accepting peers."
 			reject_connection 'not currently accepting peers'
 			return
 		end
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
-		sleep 1
-		send_action :gameserver_release, Game::SERVER_RELEASE
+		EM.add_timer(1) { send_action :gameserver_release, Game::SERVER_RELEASE }
 	end
 
 	def unbind(possible_reason= "remote/unknown")
@@ -256,11 +285,28 @@ class Peer < EventMachine::Connection
 		#now we know that they have the same deck as us
 		#send them all our peers
 		
-		res = @@peers.map(&:ip_address).join ','
-		puts res
+		res = @@peers.select {|peer| peer != self }.map(&:ip_address).join ','
+		puts "Peers to send: #{res}"
 		send_action :peers, res
 	end
 
+	def received_peers(data)
+		puts "Received peers #{data}"
+		data.split(",").each do |ip|
+			puts "peer: #{ip}"
+			if @@peers.any? { |peer| peer.ip_address == ip}
+				puts "already connected"
+			else
+				puts "not connected yet"
+				connect_to_peer ip
+			end
+
+		end
+	end
+
+	def received_ready
+		@ready=true
+	end
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
@@ -286,6 +332,10 @@ class Peer < EventMachine::Connection
 			reject_connection 'bad version'
 			return
 		end
+		unless Peer.accepting_peers?
+			reject_connection 'bad'
+			return
+		end
 		identify 
 	end
 
@@ -297,7 +347,7 @@ class Peer < EventMachine::Connection
 		incoming = parse_action line
 		return if incoming.nil?
 		puts "i => #{incoming}"
-		puts "#{peer_info_s} RX #{line}"
+		puts "#{peer_info_s} --> #{line}"
 		case incoming[:action]
 		when :public_key
 			read_public_key incoming[:data]
@@ -313,17 +363,63 @@ class Peer < EventMachine::Connection
 			send_deck
 		when :has_deck
 			peer_has_deck
+		when :peers
+			received_peers incoming[:data]
+		when :ready
+			received_ready
+			Peer.on_readiness_update
 		end
 
 		
 	end
+	def self.set_ready
+		@@peers.each { |peer| peer.send_action(:ready,nil)}
+		@@me_ready=true
+		Peer.on_readiness_update
+	end
+	@@me_ready = false
+	def self.on_readiness_update
+		if check_ready
+			puts "EVERYONE IS READY, LETS GO"
+			@@accepting_peers=false
+			puts "No longer accepting new peers because game is in progress"
+		else
+			puts "not all peers are ready, or I'm not ready =("
+		end
+	end
+	def self.check_ready
+		return false unless @@me_ready
+		return false if @@peers.length==0
+		return false if @@peers.any? {|peer| !peer.peer_is_ready_for_game_to_start}
+		return true
+	end
+	def self.has_peers
+		@@peers.length!=0
+	end
 end
 
 Game.instance # initialize everything
+def connect_to_peer(ip)
+	EM::connect ip, 54484, Peer if ip
+end
 
 EventMachine.run do
 	EM::start_server '0.0.0.0', Peer::GAME_PORT, Peer
-	#EM::connect "localhost", 54484, Peer
+	connect_to_peer(Game.instance.initial_peer)
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
+	Thread.new do
+		loop do
+			puts "waiting"
+			STDIN.gets.strip
+			if Peer.has_peers
+				puts "letting people know that I am ready now"
+				Peer.set_ready
+				return
+			else
+				puts "can't be ready, you don't have any peers"
+			end
+		end
+	end
 end
+
