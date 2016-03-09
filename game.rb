@@ -136,7 +136,7 @@ class Peer < EventMachine::Connection
 
 	def send_line(line)
 		send_data "#{line}\n"
-		puts "#{peer_info_s} <-- #{line}"
+		puts "#{peer_info_s} TX #{line}"
 	end
 
 	def send_action(action, data)
@@ -290,7 +290,7 @@ class Peer < EventMachine::Connection
 		incoming = parse_action line
 		return if incoming.nil?
 		puts "i => #{incoming}"
-		puts "#{peer_info_s} --> #{line}"
+		puts "#{peer_info_s} RX #{line}"
 		case incoming[:action]
 		when :public_key
 			read_public_key incoming[:data]
