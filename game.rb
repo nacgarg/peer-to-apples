@@ -223,8 +223,6 @@ class Peer < EventMachine::Connection
 	end
 end
 
-class ServerPeer < Peer
-
 Game.instance # initialize everything
 
 EventMachine.run do
