@@ -267,8 +267,8 @@ class Peer < EventMachine::Connection
 		#now we know that they have the same deck as us
 		#send them all our peers
 		
-		res = @@peers.map(&:ip_address).join ','
-		puts res
+		res = @@peers.select {|peer| peer != self }.map(&:ip_address).join ','
+		puts "Peers to send: #{res}"
 		send_action :peers, res
 	end
 
