@@ -57,7 +57,3 @@ class Deck
 		@white_cards
 	end
 end
-
-x = Deck.new
-x.load_from_file('examples/sample_deck.txt')
-puts x.get_hash
