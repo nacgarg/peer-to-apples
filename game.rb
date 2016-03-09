@@ -227,6 +227,12 @@ class Peer < EventMachine::Connection
 		send_action :has_deck, nil
 	end
 
+	def peer_has_deck
+		#now we know that they have the same deck as us
+		#send_action :peers, peers
+	end
+
+
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
 		if data.length > 15 || data =~ Peer::NICKNAME_CHARS_NOT_ALLOWED # bad characters
@@ -275,6 +281,8 @@ class Peer < EventMachine::Connection
 			read_deck_contents incoming[:data]
 		when :get_deck
 			send_deck
+		when :has_deck
+			peer_has_deck
 		end
 
 		puts "#{peer_info_s} --> #{line}"
