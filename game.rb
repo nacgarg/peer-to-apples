@@ -208,7 +208,12 @@ class Peer < EventMachine::Connection
 
 	def read_deck_hash(data)
 		if !Game.instance.has_deck
-			send_action :get_deck, nil
+			#if has this deck hash on disk
+				#read from disk
+				#send action :has_deck, nil
+			#else
+				send_action :get_deck, nil
+			#end
 			return
 		end
 		if data==Game.instance.get_deck_hash
@@ -224,6 +229,7 @@ class Peer < EventMachine::Connection
 
 	def read_deck_contents(data)
 		#Game.instance.deck=read_deck(data)
+		#save this deck to disk for later
 		send_action :has_deck, nil
 	end
 
