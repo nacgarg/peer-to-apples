@@ -8,6 +8,7 @@ Then, the side that was listening for the connections sends hostnames of all pee
 
 #Example connection
 **A:** the person who started the connection
+
 **B:** the person who was listening for this connection on a port
 
 
