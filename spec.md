@@ -6,6 +6,21 @@ So basically when you join, you connect to everyone already on the network, and 
 When a connection is opened, the first data that is sent is the nickname and public key. This data is sent in both directions, but the client talks first.
 Then, the side that was listening for the connections sends hostnames of all peers it knows of to the side that instigated the connection.
 
+#Example connection
+**A:** the person who started the connection
+**B:** the person who was listening for this connection on a port
+
+
+1. A->B A's nickname and public key
+2. B->A B's nickname and public key
+3. B->A hash of the deck that is being used in this game
+4. A->B _either_
+	* GetDeck
+	* IHaveThisDeck
+5. B->A deck contents, if the last message was GetDeck
+6. B->A hostnames of all peers on this game
+7. A connects to all these peers, and this same exchange will occur
+
 
 #Agreeing on a deck
 When you connect, the person who you connect to tells you the hash of the deck they are using. If you don't already have a deck with that hash, you ask for it and the person you connected to provides it. 
