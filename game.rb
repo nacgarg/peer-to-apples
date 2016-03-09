@@ -86,6 +86,10 @@ class Peer < EventMachine::Connection
 		"#{@peer_info[:ip]}:#{@peer_info[:port]}"
 	end
 
+	def ip_address
+		"#{@peer_info[:ip]}"
+	end
+
 	def player_id
 		return Peer.hash_key(@public_key)
 	end
@@ -251,7 +255,10 @@ class Peer < EventMachine::Connection
 		puts "Peer has same deck, here we would send our peers"
 		#now we know that they have the same deck as us
 		#send them all our peers
-		#send_action :peers, peers
+		
+		res = @@peers.map(&:ip_address).join ','
+		puts res
+		send_action :peers, res
 	end
 
 
