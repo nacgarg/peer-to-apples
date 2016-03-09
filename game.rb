@@ -8,11 +8,29 @@ require 'openssl'
 require 'securerandom'
 
 class Game
+	SERVER_RELEASE = 'Apples-to-Peers 0.1'
+
 	def initialize
 		@peers = []
-		@status = GameStatus::PREGAME
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
+		@local_nickname = request_nickname
+	end
+
+	attr_reader :local_nickname
+
+	def local_public_key
+		@local_rsa.public_key
+	end
+
+	def request_nickname # bad hack
+		print "Nickname? "
+		gets.strip
+	end
+
+
+	def self.instance
+		@@instance ||= Game.new
 	end
 end
 
@@ -23,8 +41,15 @@ class Peer < EventMachine::Connection
 	@@peers = []
 
 	def self.hash_key(key)
-		return nil if key.nil?
 		Digest::SHA256.digest(key.to_pem).bytes
+	end
+
+	def self.socket_encode_key(key)
+		key.to_pem.gsub "\n", '|'
+	end
+
+	def self.socket_decode_key(key_s)
+		OpenSSL::PKey::RSA.new(key_s.gsub '|', "\n")
 	end
 
 	def identify_peer
@@ -101,13 +126,13 @@ class Peer < EventMachine::Connection
 		send_line msg
 	end
 
-	ACTION_REGEX = /^([A-Z]*): (.*)/
+	ACTION_REGEX = /^([A-Z_]*): (.*)/
 	def parse_action(line)
 		match = Peer::ACTION_REGEX.match(line)
 		return nil if match.nil?
 
 		return {
-			:action => match[1].downcase.to_sym,
+			:action => match[1].downcase.intern,
 			:data => match[2]
 		}
 	end
@@ -129,12 +154,14 @@ class Peer < EventMachine::Connection
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
+
+		send_action :gameserver_release, Game::SERVER_RELEASE
 	end
 
-	def unbind
+	def unbind(possible_reason= "remote/unknown")
 		# on disconnect
 		@@peers.delete(self)
-		@disconnect_reason ||= "remote/unknown"
+		@disconnect_reason ||= possible_reason
 		puts "Connection closed with peer #{peer_info_s} -- reason: '#{@disconnect_reason}'."
 	end
 
@@ -145,26 +172,24 @@ class Peer < EventMachine::Connection
 		@disconnect_reason = "rejected; #{reason}"
 	end
 
-	def send_welcome_if_ready
-		send_action :welcome, identifying_name if ready
+	def identify
+		send_action :welcome, identifying_name
+		send_action :nickname, Game.instance.local_nickname
+		send_action :public_key, Peer.socket_encode_key(Game.instance.local_public_key)
 	end
 
-	def read_public_key_part(line)
-		@public_key_buffer += "#{line}\n"
-
-		if line === "-----END PUBLIC KEY-----"
-			# release read priority
-			@read_status = :idle
-			begin
-				@public_key = OpenSSL::PKey::RSA.new @public_key_buffer
-			rescue OpenSSL::PKey::RSAError
-				reject_connection 'bad public key'
-				return
-			end
-			send_action :received_public_key, nil
-			send_welcome_if_ready
-			puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
+	def read_public_key(data)
+		begin
+			@public_key = key = Peer.socket_decode_key(data)
+		rescue OpenSSL::PKey::RSAError
+			reject_connection 'bad public key'
+			return
 		end
+
+		send_action :received_public_key, nil
+		puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
+
+		identify if ready
 	end
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
@@ -177,47 +202,34 @@ class Peer < EventMachine::Connection
 		@nickname = data
 		@read_status = :idle
 
-		send_welcome_if_ready
+		identify if ready
 	end
 
 	def receive_line(line)
+		return if line.nil?
+
 		# determine status (each action is responsible for returning @read_status to idle)
 
 		incoming = parse_action line
+		return if incoming.nil?
+		puts "i => #{incoming}"
 
-		if @read_status == :idle
-
-			if line == "-----BEGIN PUBLIC KEY-----" # does not use action "protocol"
-				@public_key_buffer = ""
-				# capture read priority
-				@read_status = :reading_public_key
-			end
-
-			# ACTION PROTOCOL/SYSTEM
-			unless incoming.nil?
-				puts "incoming: #{incoming.inspect}"
-				if incoming[:action] == :nickname
-					@read_status = :reading_nickname
-				end
-				# add more actions here
-			end
-
-		end
-
-		puts "#{peer_info_s} --> (#{@read_status.to_s}): #{line.inspect}"
-
-		# take action
-		case @read_status
-		when :reading_public_key
-			read_public_key_part line
-		when :reading_nickname
+		case incoming[:action]
+		when :public_key
+			read_public_key incoming[:data]
+		when :nickname
 			read_nickname incoming[:data]
 		end
 
+		puts "#{peer_info_s} --> #{line}"
 	end
 end
 
+Game.instance # initialize everything
+
 EventMachine.run do
-	EM::start_server '127.0.0.1', Peer::GAME_PORT, Peer
+	EM::start_server '0.0.0.0', Peer::GAME_PORT, Peer
+	# example: EM::connect peer_ip, Peer::GAME_PORT, Peer ?
+
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 end
