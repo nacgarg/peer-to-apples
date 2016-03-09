@@ -202,8 +202,7 @@ class Peer < EventMachine::Connection
 		if !Game.instance.has_deck
 			return
 		end
-		#send_action :deck_hash, Game.instance.get_deck_hash
-
+		send_action :deck_hash, Game.instance.get_deck_hash
 	end
 
 	def read_deck_hash(data)
@@ -224,7 +223,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def send_deck
-		#send_action :deck_contents, Game.instance.deck.serialize
+		send_action :deck_contents, Game.instance.deck.serialize
 	end
 
 	def read_deck_contents(data)
@@ -235,6 +234,7 @@ class Peer < EventMachine::Connection
 
 	def peer_has_deck
 		#now we know that they have the same deck as us
+		#send them all our peers
 		#send_action :peers, peers
 	end
 
