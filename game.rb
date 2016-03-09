@@ -186,8 +186,6 @@ class Peer < EventMachine::Connection
 
 		send_action :received_public_key, nil
 		puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
-
-		identify if ready
 	end
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
@@ -199,8 +197,14 @@ class Peer < EventMachine::Connection
 
 		@nickname = data
 		@read_status = :idle
+	end
 
-		identify if ready
+	def read_version(data)
+		if Game::SERVER_RELEASE != data
+			reject_connection 'bad version'
+			return
+		end
+		identify 
 	end
 
 	def receive_line(line)
@@ -217,6 +221,8 @@ class Peer < EventMachine::Connection
 			read_public_key incoming[:data]
 		when :nickname
 			read_nickname incoming[:data]
+		when :gameserver_release
+			read_version incoming[:data]
 		end
 
 		puts "#{peer_info_s} --> #{line}"
