@@ -17,6 +17,8 @@ class Game
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
 		@local_nickname = request_nickname
+		@deck=Deck.new
+		@deck.load_from_file "examples/sample_deck.txt"
 	end
 
 	attr_reader :local_nickname
@@ -37,7 +39,7 @@ class Game
 		@deck
 	end
 	def get_deck_hash
-		@deck.get_deck 
+		@deck.get_hash
 	end
 	def self.instance
 		@@instance ||= Game.new
@@ -244,6 +246,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def peer_has_deck
+		puts "Peer has same deck, here we would send our peers"
 		#now we know that they have the same deck as us
 		#send them all our peers
 		#send_action :peers, peers
