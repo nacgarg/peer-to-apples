@@ -34,15 +34,39 @@ class Deck
 	end
 
 	def serialize()
-		data = 'black_cards\n'
+		data = 'black_cards|'
 		@black_cards.each do |card|
-			data += '#{card.text}'
+			data += '#{card.text}|'
 		end
-		data += 'white_cards'
+		data += 'white_cards|'
 		@white_cards.each do |card|
-			data += '#{card.text}'
+			data += '#{card.text}|'
 		end
 		return data
+	end
+
+	def load_from_serialized(serialized)
+		serialized.split('|').each do |line|
+			if !line.strip.start_with?('#') and !(line =~ /^\s*$/)
+				if line.strip == 'black_cards' then
+					@current_type = :black
+					next
+				end
+				if line.strip == 'white_cards' then
+					@current_type = :white
+					next
+				end
+				if @current_type.nil?
+					raise 'Card type not specified before card text'
+				end
+				if @current_type == :black
+					@black_cards << BlackCard.new(line.strip)
+				end
+				if @current_type == :white
+					@white_cards << WhiteCard.new(line.strip)
+				end
+			end
+		end
 	end
 
 	def get_hash()
