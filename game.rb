@@ -7,6 +7,8 @@ require 'socket'
 require 'openssl'
 require 'securerandom'
 
+require 'pry'
+
 require_relative 'deck.rb'
 
 class Game
@@ -83,7 +85,13 @@ class Peer < EventMachine::Connection
 
 	def identify_peer
 		pname = get_peername
-		return false if pname.nil?
+		if pname.nil?
+			@peer_info = { # store because get_peername doesn't work in `#unbind`
+				:port => :unknown,
+				:ip => :unknown
+			}
+			return false
+		end
 		port, ip = Socket.unpack_sockaddr_in(pname)
 		@peer_info = { # store because get_peername doesn't work in `#unbind`
 			:port => port,
@@ -172,6 +180,13 @@ class Peer < EventMachine::Connection
 
 	def post_init
 		if !identify_peer # stores peer info in @peer_info
+			@identification_attempts_left ||= 5
+			@identification_attempts_left -= 1
+			if @identification_attempts_left > 0
+				puts "Couldn't identify peer... will try #{@identification_attempts_left} more times..."
+				EM.add_timer(1) { post_init }
+				return
+			end
 			puts 'Cannot identify peer -- rejecting peer connection.'
 			reject_connection 'cannot identify peer'
 			return
@@ -185,7 +200,6 @@ class Peer < EventMachine::Connection
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
-		sleep 1
 		send_action :gameserver_release, Game::SERVER_RELEASE
 	end
 
