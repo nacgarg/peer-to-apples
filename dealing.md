@@ -3,7 +3,8 @@ Everyone listens on the _apples to peers_ port, which is going to be a number. W
 
 So basically when you join, you connect to everyone already on the network, and then you start listening for connections from people who might join after you
 
-When a connection is opened, the 
+When a connection is opened, the first data that is sent is the nickname and public key. This data is sent in both directions.
+Then, the side that was listening for the connections sends hostnames of all peers it knows of to the side that instigated the connection.
 # Random Dealing
 1. Everyone generates a RSA private key.
 3. Everyone submits their RSA public key
