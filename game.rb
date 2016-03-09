@@ -18,9 +18,10 @@ class Game
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
 		@local_nickname = request_input 'Nickname? ', true
-		if(!ARGV[1].nil?)
+		deckPath = request_input 'Path to deck? ',false
+		if !deckPath.nil?
 			@deck = Deck.new
-			@deck.load_from_file ARGV[1]
+			@deck.load_from_file deckPath
 		end
 	end
 
