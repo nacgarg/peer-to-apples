@@ -71,6 +71,4 @@ The order of the black cards (which is public, like the order of the judges) is 
 
 
 Now people need to draw another card... (to be continued)
-
-
-
+Well at the end of every round, everyone knows which `hashedCard` they have used up, so now everyone knows the remaining `hashedCard`s in everyone's hand. So basically everyone draws another card in the exact same way as detailed above and broadcasts the new `hashedCard`.
