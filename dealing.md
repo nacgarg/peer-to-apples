@@ -1,3 +1,7 @@
+# Peering
+Everyone listens on the _apples to peers_ port, which is going to be a number. When somenoe joins, they join by the user inputting the hostname of someone currently running it, and it'll connect to that hostname. Then it'll ask that hostname for all the other peers, and connect to all those.
+
+So basically when you join, you connect to everyone already on the network, and then you start listening for connections from people who might join after you
 # Random Dealing
 1. Everyone generates a RSA private key.
 3. Everyone submits their RSA public key
@@ -22,7 +26,7 @@ Now every player has a list of cards that they could draw (called a subdeck)
 
 **Then each player selects `n` cards from their segment to be their hand.**
 First they select random numbers `myRandom[0...n]`. They keep these secret.
-Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength`
+Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength` **this hash needs to use a different algorithm that is designed to be slow, like bcrypt, to prevent brute forcing to get a certain card**
 
 Now that each player knows what cards are in their hand, they need to "encrypt" and declare their hashed hand.
 They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`.
@@ -33,7 +37,7 @@ In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`
 
 
 
------
+# Gameplay
 
 **Here's how it works to actually play the game.** What should happen is that everyone gives a card face down to the judge, the judge flips them over, picks one, then the person who submitted that card says "hey that was me".
 	This is made easier by the fact that there are no duplicate cards.
