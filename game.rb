@@ -184,7 +184,7 @@ class Peer < EventMachine::Connection
 			@identification_attempts_left -= 1
 			if @identification_attempts_left > 0
 				puts "Couldn't identify peer... will try #{@identification_attempts_left} more times..."
-				EM.add_timer(1) { post_init }
+				EM.add_timer(0.3) { post_init }
 				return
 			end
 			puts 'Cannot identify peer -- rejecting peer connection.'
@@ -200,7 +200,7 @@ class Peer < EventMachine::Connection
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
-		send_action :gameserver_release, Game::SERVER_RELEASE
+		EM.add_timer(1) { send_action :gameserver_release, Game::SERVER_RELEASE }
 	end
 
 	def unbind(possible_reason= "remote/unknown")
