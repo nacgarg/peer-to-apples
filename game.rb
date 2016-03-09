@@ -100,6 +100,10 @@ class Peer < EventMachine::Connection
 		return true
 	end
 
+	def peer_is_ready_for_game_to_start
+		@ready.nil? ? false : @ready
+	end
+
 	def peer_info_s
 		"#{@peer_info[:ip]}:#{@peer_info[:port]}"
 	end
@@ -299,6 +303,9 @@ class Peer < EventMachine::Connection
 		end
 	end
 
+	def received_ready
+		@ready=true
+	end
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
@@ -353,10 +360,37 @@ class Peer < EventMachine::Connection
 			peer_has_deck
 		when :peers
 			received_peers incoming[:data]
+		when :ready
+			received_ready
+			Peer.on_readiness_update
 		end
 
 		
 	end
+	def self.set_ready
+		@@peers.each { |peer| peer.send_action(:ready,nil)}
+		@@me_ready=true
+		Peer.on_readiness_update
+	end
+	@@me_ready = false
+	def self.on_readiness_update
+		if check_ready
+			puts "LETS GO"
+		else
+			puts "not ready =("
+		end
+	end
+	def self.check_ready
+		puts "Checking readyness"
+		return false unless @@me_ready
+		puts "I am ready"
+		return false if @@peers.length==0
+		puts "Has peers"
+		return false if @@peers.any? {|peer| !peer.peer_is_ready_for_game_to_start}
+		puts "All peers ready"
+		return true
+	end
+
 end
 
 Game.instance # initialize everything
@@ -369,4 +403,11 @@ EventMachine.run do
 	connect_to_peer(Game.instance.initial_peer)
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
+	Thread.new do
+		puts "waiting"
+		STDIN.gets.strip
+		puts "seting ready"
+		Peer.set_ready
+	end
 end
+
