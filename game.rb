@@ -410,7 +410,7 @@ EventMachine.run do
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 	Thread.new do
 		loop do
-			puts "waiting"
+			puts "waiting, hit enter once you are ready for the game to start"
 			STDIN.gets.strip
 			if Peer.has_peers
 				puts "letting people know that I am ready now"
