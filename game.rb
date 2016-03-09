@@ -7,6 +7,8 @@ require 'socket'
 require 'openssl'
 require 'securerandom'
 
+require_relative 'card.rb'
+
 class Game
 	SERVER_RELEASE = 'Apples-to-Peers 0.1'
 
@@ -28,6 +30,9 @@ class Game
 		gets.strip
 	end
 
+	def has_deck
+		!@deck.nil?
+	end
 
 	def self.instance
 		@@instance ||= Game.new
@@ -88,7 +93,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def identifying_name
-		return nil unless ready
+		return nil unless has_identified
 		"#{nickname}@#{hashed_key_hex}"
 	end
 
@@ -100,7 +105,7 @@ class Peer < EventMachine::Connection
 		!@nickname.nil?
 	end
 
-	def ready
+	def has_identified
 		public_key_known && nickname_known
 	end
 
@@ -183,10 +188,21 @@ class Peer < EventMachine::Connection
 			reject_connection 'bad public key'
 			return
 		end
-
+		reject_connection 'already has public key' if public_key_known
 		send_action :received_public_key, nil
 		puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
+
+		send_deck_info if has_identified
 	end
+
+	def send_deck_info
+		if !Game.instance.has_deck
+			return
+		end
+		#send_action :deck_hash, 
+
+	end
+
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
@@ -194,9 +210,14 @@ class Peer < EventMachine::Connection
 			reject_connection 'bad nickname'
 			return
 		end
+		
+		reject_connection 'already has nickname' if nickname_known
+
 
 		@nickname = data
 		@read_status = :idle
+
+		send_deck_info if has_identified
 	end
 
 	def read_version(data)
