@@ -33,12 +33,20 @@ class Game
 	def has_deck
 		!@deck.nil?
 	end
+	def deck
+		@deck
+	end
 	def get_deck_hash
 		@deck.get_deck 
 	end
 	def self.instance
 		@@instance ||= Game.new
 	end
+	def read_deck(data)
+		@deck=Deck.new
+		@deck.load_from_serialized(data)
+	end
+
 end
 
 class Peer < EventMachine::Connection
@@ -229,7 +237,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def read_deck_contents(data)
-		#Game.instance.deck=read_deck(data)
+		Game.instance.read_deck(data)
 		#save this deck to disk for later
 		send_action :has_deck, nil
 	end
