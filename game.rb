@@ -192,14 +192,14 @@ class Peer < EventMachine::Connection
 	end
 
 	def read_public_key(data)
+		if public_key_known
+			reject_connection 'already has public key' 
+			return
+		end
 		begin
 			@public_key = key = Peer.socket_decode_key(data)
 		rescue OpenSSL::PKey::RSAError
 			reject_connection 'bad public key'
-			return
-		end
-		if public_key_known
-			reject_connection 'already has public key' 
 			return
 		end
 		send_action :received_public_key, nil
@@ -309,7 +309,7 @@ Game.instance # initialize everything
 
 EventMachine.run do
 	EM::start_server '0.0.0.0', Peer::GAME_PORT, Peer
-	# example: EM::connect peer_ip, Peer::GAME_PORT, Peer ?
+	#EM::connect "localhost", 54484, Peer
 
 	puts "Accepting peer connections at :#{Peer::GAME_PORT}"
 end
