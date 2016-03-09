@@ -183,12 +183,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def post_init
-		unless Peer.accepting_peers?
-			puts "Peer candidate denied admission -- not currently accepting peers."
-			reject_connection 'not currently accepting peers'
-			return
-		end
-
+		
 		if !identify_peer # stores peer info in @peer_info
 			@identification_attempts_left ||= 5
 			@identification_attempts_left -= 1
@@ -202,7 +197,11 @@ class Peer < EventMachine::Connection
 			return
 		end
 
-		
+		unless Peer.accepting_peers?
+			puts "Peer candidate denied admission -- not currently accepting peers."
+			reject_connection 'not currently accepting peers'
+			return
+		end
 
 		@@peers << self
 		puts "Connected to peer #{peer_info_s}."
@@ -331,6 +330,10 @@ class Peer < EventMachine::Connection
 	def read_version(data)
 		if Game::SERVER_RELEASE != data
 			reject_connection 'bad version'
+			return
+		end
+		unless Peer.accepting_peers?
+			reject_connection 'bad'
 			return
 		end
 		identify 
