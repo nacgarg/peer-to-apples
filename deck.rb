@@ -36,11 +36,11 @@ class Deck
 	def serialize()
 		data = 'black_cards|'
 		@black_cards.each do |card|
-			data += '#{card.text}|'
+			data += "#{card.text}|"
 		end
 		data += 'white_cards|'
 		@white_cards.each do |card|
-			data += '#{card.text}|'
+			data += "#{card.text}|"
 		end
 		return data
 	end
@@ -57,7 +57,7 @@ class Deck
 					next
 				end
 				if @current_type.nil?
-					raise 'Card type not specified before card text'
+					raise 'Invalid serialized data'
 				end
 				if @current_type == :black
 					@black_cards << BlackCard.new(line.strip)

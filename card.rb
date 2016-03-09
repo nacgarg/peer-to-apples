@@ -4,6 +4,10 @@ class Card
 	def to_s
 		"#{@type} card: '#{@text}'"
   	end
+  	
+  	def text()
+		@text
+	end
 end
 
 class BlackCard < Card
@@ -11,7 +15,6 @@ class BlackCard < Card
 		@text = text
 		@type = :black
 	end
-
 end
 
 class WhiteCard < Card
