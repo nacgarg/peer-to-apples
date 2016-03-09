@@ -206,18 +206,26 @@ class Peer < EventMachine::Connection
 
 	end
 
-	def read_deck_hash(line)
+	def read_deck_hash(data)
 		if !Game.instance.has_deck
 			send_action :get_deck, nil
 			return
 		end
-		if line==Game.instance.get_deck_hash
+		if data==Game.instance.get_deck_hash
 			send_action :has_deck, nil 
 		else
 			reject_connection 'already got a different deck from someone else'
 		end
 	end
 
+	def send_deck
+		#send_action :deck_contents, Game.instance.deck.serialize
+	end
+
+	def read_deck_contents(data)
+		#Game.instance.deck=read_deck(data)
+		send_action :has_deck, nil
+	end
 
 	NICKNAME_CHARS_NOT_ALLOWED = /[^A-Za-z0-9_]/
 	def read_nickname(data)
@@ -263,6 +271,10 @@ class Peer < EventMachine::Connection
 			read_version incoming[:data]
 		when :deck_hash
 			read_deck_hash incoming[:data]
+		when :deck_contents
+			read_deck_contents incoming[:data]
+		when :get_deck
+			send_deck
 		end
 
 		puts "#{peer_info_s} --> #{line}"
