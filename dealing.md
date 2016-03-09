@@ -7,33 +7,34 @@ So basically when you join, you connect to everyone already on the network, and 
 3. Everyone submits their RSA public key
 * Their ID is the hash of their public key.
 
-Then, to facilitate random number generation that's agreed on by the group, the group generates a shared random number
+Then, to facilitate random number generation that's agreed on by the group, everyone in the group generates a shared random number:
 `groupRandom = hash(everyone's ID, sorted from least to greatest)`
-Then each person generates a random number that is dependant on the group random number but is different for each person
+Then each person generates a random number that is dependant on the group random number but is different for each person:
 `localRandom = hash(groupRandom + my ID)`
 
 
-Then in order to prevent duplicates, we split up the deck into numPlayers segments.
+Then in order to prevent duplicates (the same card being in multiple hands), we split up the deck into numPlayers segments.
 
 Here's how you do this:
 
 1. Make a random number generator, seeded by the string `groupRandom + "whiteCards"`
 2. Use that random number generator to shuffle the white cards
+	* Assume that each player has the same list of white cards in the same order to begin with
 3. Split this deck into `numPlayers` equal segments
 4. Assign each player a segment, going in order of player ID from least to greatest
 
-Now every player has a list of cards that they could draw (called a subdeck)
+Now every player has a list of cards that they could draw the card in their hand from 
 
 **Then each player selects `n` cards from their segment to be their hand.**
 First they select random numbers `myRandom[0...n]`. They keep these secret.
-Here's how they calculate the cardIndex of card i of their hand: `cardIndex[i]=hash(localRandom + myRandom[i] + i) % mySubDeckLength` **this hash needs to use a different algorithm that is designed to be slow, like bcrypt, to prevent brute forcing to get a certain card**
+Here's how they calculate the cardIndex of card i of their hand: `cards[i]=mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]` **this hash needs to use a different algorithm that is designed to be slow, like bcrypt, to prevent brute forcing to get a certain card**
 
 Now that each player knows what cards are in their hand, they need to "encrypt" and declare their hashed hand.
-They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`.
+They generate more random numbers `otherRandomNumbers[0...n]`. Then they calculate `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. Their encrypted hand is composed of `hashedCard[0...n]`. Everyone broadcasts their hashed hand, signed by their private key, to everyone.  (not sure about the signed by the private key part, might be unnecessary)
 
 
 The point of all this is so that each player has a secret set of cards in their hand, **but at any point can prove that a given card is in their hand**.
-In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `otherRandomNumbers[i]`. Then others can verify `hash(localRandom + myRandom[i] + i) = cards[i]` and that `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
+In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]` and `otherRandomNumbers[i]`. Then others can verify `mySubDeck[hash(localRandom + myRandom[i] + i) % mySubDeckLength]=cards[i]` and that `hashedCard[i]=hash(cards[i] + otherRandomNumbers[i])`. This proves that I randomly selected this card (and didn't specifically pick it), and that it was in the encrypted hand that I originally disseminated. 
 
 
 
@@ -44,7 +45,7 @@ In order to prove that I really have `cards[i]`, I have to provide `myRandom[i]`
 	Here's how we do that in a p2p way:
 
 1. **everyone gives a facedown card to the judge**
-		Everyone picks a card, and encrypts it with the judge's public key. (add random padding to card before encrypting to prevent fingerprinting attacks)
+		Everyone picks a card, and encrypts it with the judge's public key. (add random padding that judge will ignore to the card before encrypting to prevent fingerprinting attacks)
 		Then they send the encrypted cards to each other. Whenever someone who isn't the judge receives an encrypted card, they forward it to three other random people (which may include the judge).
 		Why do this? Because now the judge is receiving encrypted cards from random people, not necesarily the same person as who picked the card. This ensures that the judge doesn't know who submitted what card.
 		So now the judge has all the encrypted cards.
