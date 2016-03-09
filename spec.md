@@ -1,5 +1,5 @@
 # Peering
-Everyone listens on the _apples to peers_ port, which is going to be a number. When somenoe joins, they join by the user inputting the hostname of someone currently running it, and it'll connect to that hostname. Then it'll ask that hostname for all the other peers, and connect to all those.
+Everyone listens on the _apples to peers_ port, which is going to be a number. When someone joins, they join by the user inputting the hostname of someone currently running it, and it'll connect to that hostname. Then it'll ask that hostname for all the other peers, and connect to all those.
 
 So basically when you join, you connect to everyone already on the network, and then you start listening for connections from people who might join after you
 
