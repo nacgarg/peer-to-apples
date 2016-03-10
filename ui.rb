@@ -20,7 +20,7 @@ module UI
 		return hand[input - 1]
 	end
 
-	def pick_black_card(cards)
+	def judge_pick_card(cards)
 		cards.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
 		puts "Type in the number of the card you think should win."
 		input = gets.strip.to_i
