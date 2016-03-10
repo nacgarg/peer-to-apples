@@ -428,7 +428,7 @@ class Peer < EventMachine::Connection
 		if mySeg.size<numCards
 			numCards=mySeg.size
 		end
-		loop do {
+		loop do
 			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i.to_s
 			puts cardIndex
 			cardIndex=int_from_str cardIndex
@@ -440,7 +440,7 @@ class Peer < EventMachine::Connection
 					break
 				end
 			end
-		}
+		end
 		puts "myHandIndexes: #{@@myHandIndexes}"
 		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
 		puts "myHand: #{@@myHand}"
