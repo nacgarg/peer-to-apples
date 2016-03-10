@@ -452,7 +452,7 @@ class Peer < EventMachine::Connection
 			SecureRandom.hex
 		}
 		@@hashedCard=Array.new(numCards){ |i|
-			Digest::SHA256.hexdigest(@@myHandIndexes[i] + ',' + @@cardNonce[i])
+			Digest::SHA256.hexdigest(@@myHandIndexes[i].to_s + ',' + @@cardNonce[i])
 		}
 		puts "hashedCard: #{@@hashedCard}"
 		Thread.new do
