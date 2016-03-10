@@ -419,7 +419,28 @@ class Peer < EventMachine::Connection
 		puts "judgeOrder: #{@@judge_order}"
 		mySeg=Game.instance.deck.white_segment(@@peers.size+1,@@my_index)
 		puts "mySegment: #{mySeg}"
+		@@myRandom=Array.new(8){|i|
+			Digest::SHA256.hexdigest(rand_str)
+		}
+		puts "myRandom: #{@@myRandom}"
+		@@myHandIndexes=Array.new(8){ |i|
+			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i
+			puts cardIndex
+			cardIndex=int_from_str cardIndex
+			cardIndex=cardIndex%mySeg.size
+			cardIndex
+		}
+		puts "myHandIndexes: #{@@myHandIndexes}"
+		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
+		puts "myHand: #{@@myHand}"
+
 	end
+end
+def rand_str
+	(0...50).map { ('a'..'z').to_a[rand(26)] }.join
+end
+def int_from_str(seed_str)
+	(Digest::SHA1.hexdigest(seed_str).to_i(16))
 end
 def prng_from_string(seed_str)
 	Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
