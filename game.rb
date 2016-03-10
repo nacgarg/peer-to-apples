@@ -394,7 +394,7 @@ class Peer < EventMachine::Connection
 	end
 
 	def self.current_black_card
-		Game.instance.deck.black_cards[@@roundNumber % Game.instance.deck.black_cards.size]
+		Game.instance.deck.black_cards[@@round_number % Game.instance.deck.black_cards.size]
 	end
 
 	def self.game_start 
@@ -474,7 +474,7 @@ class Peer < EventMachine::Connection
 			ind=@@myhand.index card
 			puts "You picked card #{card} index #{ind}"
 			puts "Sending to judge #{Peer.current_judge}"
-			return
+			break
 		end
 	end
 end
