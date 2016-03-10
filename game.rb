@@ -445,7 +445,13 @@ class Peer < EventMachine::Connection
 		puts "myHandIndexes: #{@@myHandIndexes}"
 		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
 		puts "myHand: #{@@myHand}"
-
+		@@cardNonce=Array.new(numCards){ |i|
+			Digest::SHA256.hexdigest(rand_str)
+		}
+		@@hashedCard=Arary.new(numCards){ |i|
+			Digest::SHA256.hexdigest(@@myHandIndexes[i] + ',' + @@cardNonce[i])
+		}
+		puts "hashedCard: #{@@hashedCard}"
 	end
 end
 def rand_str
