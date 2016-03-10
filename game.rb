@@ -397,7 +397,14 @@ class Peer < EventMachine::Connection
 	def self.has_peers
 		@@peers.length!=0
 	end
+	def self.current_judge
+		@@judge_order[@@round_number % @@judgeOrder.size]
+	end
+	def self.current_black_card
+		Game.instance.deck.black_cards[@@roundNumber % Game.instance.deck.black_cards.size]
+	end
 	def self.game_start 
+		@@round_number=0
 		hashed_keys=@@peers.map { |peer| peer.hashed_key }
 		hashed_keys << Game.instance.local_id
 		hashed_keys.sort!
