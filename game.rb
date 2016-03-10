@@ -65,7 +65,7 @@ class Peer < EventMachine::Connection
 	include EM::P::LineProtocol
 	include UI
 
-	GAME_PORT = 54484 if ARGV[0].nil? else ARGV[0].to_i  # class constant
+	GAME_PORT =  ARGV[0].nil? ? 54484 : ARGV[0].to_i  # class constant
 	@@peers = []
 
 	def self.hash_key(key)
