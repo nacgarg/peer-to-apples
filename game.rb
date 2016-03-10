@@ -415,7 +415,7 @@ class Peer < EventMachine::Connection
 
 		local_rand_base = @@group_random_seed + ',' + Game.instance.local_id
 		@@local_random_seed = Digest::SHA256.hexdigest(local_rand_base)
-		puts "Our local random base is #{local_rand_base}, converted to hex: #{@@localRandomSeed}"
+		puts "Our local random base is #{local_rand_base}, converted to hex: #{@@local_random_seed}"
 
 		Game.instance.deck.shuffle(@@group_random_seed)
 
@@ -437,7 +437,7 @@ class Peer < EventMachine::Connection
 
 		loop do
 			rnd = SecureRandom.hex
-			cardIndex = @@localRandomSeed + ',' + rnd + ',' + i.to_s
+			cardIndex = @@local_random_seed + ',' + rnd + ',' + i.to_s
 			puts cardIndex
 			cardIndex = int_from_str cardIndex
 			cardIndex = cardIndex % my_segment.size
