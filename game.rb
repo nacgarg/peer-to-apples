@@ -414,6 +414,7 @@ class Peer < EventMachine::Connection
 		Game.instance.deck.shuffle(@@groupRandomSeed)
 		@@judge_order=@@peers.map { |peer| peer.hashed_key }
 		@@judge_order << Game.instance.local_id
+		@@judge_order.sort!
 		@@judge_order.shuffle(random: prng_from_string(@@groupRandomSeed + "judgeOrder"))
 		puts "judgeOrder: #{@@judge_order}"
 	end
