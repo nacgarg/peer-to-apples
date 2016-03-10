@@ -431,7 +431,7 @@ class Peer < EventMachine::Connection
 		@@myRandom = Array.new
 		@@myHandIndexes=Array.new
 
-		num_cards = my_segment.size if my_segment.size < num_cards else 8 # TODO Math.max ?
+		num_cards =  my_segment.size < num_cards ?  my_segment.size : 8
 
 		i = 0
 
