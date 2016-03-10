@@ -416,7 +416,6 @@ class Peer < EventMachine::Connection
 		puts "Shuffled: #{@@shuffledWhiteCards}"
 	end
 end
-def shuff
 def prng_from_string(seed_str)
 	Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
 end
