@@ -458,7 +458,7 @@ class Peer < EventMachine::Connection
 		@@cardNonce=Array.new(num_cards){ |i|
 			SecureRandom.hex
 		}
-		@@hashedCard=Array.new(numCards){ |i|
+		@@hashedCard=Array.new(num_cards){ |i|
 			Digest::SHA256.hexdigest(@@myHandIndexes[i].to_s + ',' + @@cardNonce[i])
 		}
 		puts "hashedCard: #{@@hashedCard}"
