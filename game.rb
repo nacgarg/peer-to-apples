@@ -417,6 +417,8 @@ class Peer < EventMachine::Connection
 		@@judge_order.sort!
 		@@judge_order.shuffle(random: prng_from_string(@@groupRandomSeed + "judgeOrder"))
 		puts "judgeOrder: #{@@judge_order}"
+		mySeg=Game.instance.deck.white_segment(@@peers.size+1,@@my_index)
+		puts "mySegment: #{mySeg}"
 	end
 end
 def prng_from_string(seed_str)

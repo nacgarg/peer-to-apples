@@ -89,7 +89,14 @@ class Deck
 		@black_cards=@black_cards.shuffle(random: blackCardsPRNG)
 		puts "Black Shuffled: #{@black_cards}"
 	end
-
+	def white_segments(num_groups)
+  		return [] if num_groups == 0
+  		slice_size = (@white_cards.size/Float(num_groups)).ceil
+  		@white_cards.each_slice(slice_size).to_a
+	end
+	def white_segment(numPlayers,index)
+		return white_segments(numPlayers)[index]
+	end
 end
 def prng_from_string(seed_str)
 	Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
