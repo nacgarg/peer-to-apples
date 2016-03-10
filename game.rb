@@ -41,15 +41,6 @@ class Game
 		@local_rsa.public_key
 	end
 
-	def request_input(prompt, required)
-		print "#{prompt} "
-		loop do
-			s = STDIN.gets.strip
-			return s unless s.empty?
-			return nil unless required
-		end
-	end
-
 	def has_deck
 		!@deck.nil?
 	end
