@@ -10,7 +10,7 @@ module UI
 	end
 
 	def pick_white_card(hand)
-		hand.each_with_index { |card, index| puts "#{index+1}: #{card}" }
+		hand.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
 		puts "Type in the number of the card you want to play."
 		input = gets.strip.to_i
 		if input == 0 || input > hand.length
