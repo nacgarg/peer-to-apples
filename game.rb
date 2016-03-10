@@ -424,7 +424,7 @@ class Peer < EventMachine::Connection
 		}
 		puts "myRandom: #{@@myRandom}"
 		@@myHandIndexes=Array.new(8){ |i|
-			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i
+			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i.to_s
 			puts cardIndex
 			cardIndex=int_from_str cardIndex
 			cardIndex=cardIndex%mySeg.size
