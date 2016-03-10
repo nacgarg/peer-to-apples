@@ -455,6 +455,19 @@ class Peer < EventMachine::Connection
 			Digest::SHA256.hexdigest(@@myHandIndexes[i] + ',' + @@cardNonce[i])
 		}
 		puts "hashedCard: #{@@hashedCard}"
+		Thread.new do
+			Peer.main_loop
+		end
+	end
+	def self.main_loop
+		loop do
+			puts "The black card is #{Peer.current_black_card}"
+			card=pick_white_card @@myHand
+			ind=@@myhand.index card
+			puts "You picked card #{card} index #{ind}"
+			puts "Sending to judge #{Peer.current_judge}"
+			return
+		end
 	end
 end
 def int_from_str(seed_str)
