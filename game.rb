@@ -19,9 +19,9 @@ class Game
 
 	def initialize
 		@peers = []
-		@initial_peer = request_input 'Initial Peer IP? ', false
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
+		@initial_peer = request_input 'Initial Peer IP? ', false
 		@local_nickname = request_input 'Nickname? ', true
 		deckPath = request_input 'Path to deck? ',false
 		if !deckPath.nil?
