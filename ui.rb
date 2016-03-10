@@ -1,6 +1,6 @@
 module UI
 
-	def request_input(prompt, required)
+	def request_input(prompt, required=false)
 		print "#{prompt} "
 		loop do
 			s = STDIN.gets.strip
