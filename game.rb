@@ -9,8 +9,12 @@ require 'securerandom'
 
 
 require_relative 'deck.rb'
+require_relative 'ui.rb'
 
 class Game
+
+	# include UI
+
 	SERVER_RELEASE = 'Apples-to-Peers 0.1'
 
 	def initialize
