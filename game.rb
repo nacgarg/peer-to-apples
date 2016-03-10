@@ -8,16 +8,19 @@ require 'openssl'
 require 'securerandom'
 
 require_relative 'deck.rb'
+require_relative 'ui.rb'
 
 class Game
+
+	include UI
+
 	SERVER_RELEASE = 'Apples-to-Peers 0.1'
 
 	def initialize
 		@peers = []
 		@local_rsa = OpenSSL::PKey::RSA.new 2048
 		@local_id = Peer.hash_key @local_rsa.public_key
-
-    @initial_peer = request_input 'Initial Peer IP? '
+		@initial_peer = request_input 'Initial Peer IP? '
 		@local_nickname = request_input 'Nickname? ', true
 		deck_path = request_input 'Path to deck? '
 
@@ -29,8 +32,8 @@ class Game
 
 	attr_reader :local_nickname
 	attr_reader :initial_peer
-  attr_reader :local_id
-  attr_reader :deck
+	attr_reader :local_id
+	attr_reader :deck
 
 	def has_initial_peer
 		!@initial_peer.nil?
@@ -38,17 +41,7 @@ class Game
 
 	def local_public_key
 		@local_rsa.public_key
-	end
-
-	def request_input(prompt, required=false)
-		print "#{prompt} "
-		loop do
-			s = STDIN.gets.strip
-			return s unless s.empty?
-			return nil unless required
-		end
-	end
-
+	end 
 	def has_deck
 		!@deck.nil?
 	end
@@ -70,6 +63,7 @@ end
 
 class Peer < EventMachine::Connection
 	include EM::P::LineProtocol
+	include UI
 
 	GAME_PORT = 54484 if ARGV[0].nil? else ARGV[0].to_i  # class constant
 	@@peers = []
@@ -464,10 +458,26 @@ class Peer < EventMachine::Connection
 		@@cardNonce=Array.new(num_cards){ |i|
 			SecureRandom.hex
 		}
-		@@hashedCard=Arary.new(num_cards){ |i|
-			Digest::SHA256.hexdigest(@@myHandIndexes[i] + ',' + @@cardNonce[i])
+		@@hashedCard=Array.new(numCards){ |i|
+			Digest::SHA256.hexdigest(@@myHandIndexes[i].to_s + ',' + @@cardNonce[i])
 		}
 		puts "hashedCard: #{@@hashedCard}"
+		Thread.new do
+			puts "starting main loop thread"
+			puts "threads don't just do the first line"
+			Peer.main_loop
+		end
+	end
+	def self.main_loop
+		puts "in main loop function"
+		loop do
+			puts "The black card is #{Peer.current_black_card}"
+			card=pick_white_card @@myHand
+			ind=@@myhand.index card
+			puts "You picked card #{card} index #{ind}"
+			puts "Sending to judge #{Peer.current_judge}"
+			return
+		end
 	end
 end
 def int_from_str(seed_str)
