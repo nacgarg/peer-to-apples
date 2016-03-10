@@ -423,12 +423,23 @@ class Peer < EventMachine::Connection
 			Digest::SHA256.hexdigest(rand_str)
 		}
 		puts "myRandom: #{@@myRandom}"
-		@@myHandIndexes=Array.new(8){ |i|
+		@@myHandIndexes=Array.new
+		numCards=8
+		if mySeg.size<numCards
+			numCards=mySeg.size
+		end
+		loop do {
 			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i.to_s
 			puts cardIndex
 			cardIndex=int_from_str cardIndex
 			cardIndex=cardIndex%mySeg.size
-			cardIndex
+			if @@myHandIndexes.index(cardIndex).nil?
+				@@myHandIndexes<<cardIndex
+				i+=1
+				if(i==numCards)
+					break
+				end
+			end
 		}
 		puts "myHandIndexes: #{@@myHandIndexes}"
 		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
