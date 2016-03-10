@@ -409,11 +409,7 @@ class Peer < EventMachine::Connection
 		puts "grouprandomseed: #{@@groupRandomSeed}"
 		puts "localRand: #{localRand}"
 		puts "localRandomSeed: #{@@localRandomSeed}"
-		whiteCardsPRNG=prng_from_string(@@groupRandomSeed+"whiteCards")
-		deck=Game.instance.deck
-		puts "Prev white cards: #{deck.white_cards}"
-		@@shuffledWhiteCards=deck.white_cards.shuffle(random: whiteCardsPRNG)
-		puts "Shuffled: #{@@shuffledWhiteCards}"
+		Game.instance.deck.shuffle(@@groupRandomSeed)
 	end
 end
 def prng_from_string(seed_str)

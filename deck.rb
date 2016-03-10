@@ -80,4 +80,17 @@ class Deck
 	def white_cards()
 		@white_cards
 	end
+
+	def shuffle(groupRandomSeed)
+		whiteCardsPRNG=prng_from_string(groupRandomSeed+"whiteCards")
+		@white_cards=@white_cards.shuffle(random: whiteCardsPRNG)
+		puts "White Shuffled: #{@white_cards}"
+		blackCardsPRNG=prng_from_string(groupRandomSeed+"blackCards")
+		@black_cards=@black_cards.shuffle(random: blackCardsPRNG)
+		puts "Black Shuffled: #{@black_cards}"
+	end
+
+end
+def prng_from_string(seed_str)
+	Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
 end
