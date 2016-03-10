@@ -62,6 +62,9 @@ class Game
 		@deck=Deck.new
 		@deck.load_from_serialized(data)
 	end
+	def local_id
+		@local_id
+	end
 
 end
 
@@ -72,7 +75,7 @@ class Peer < EventMachine::Connection
 	@@peers = []
 
 	def self.hash_key(key)
-		Digest::SHA256.digest(key.to_pem).bytes
+		Digest::SHA256.hexdigest(key.to_pem)
 	end
 
 	def self.socket_encode_key(key)
@@ -128,13 +131,10 @@ class Peer < EventMachine::Connection
 		Peer.hash_key(@public_key) if public_key_known
 	end
 
-	def hashed_key_hex
-		hashed_key.map { |b| b.to_s(16) }.join
-	end
 
 	def identifying_name
 		return nil unless has_identified
-		"#{nickname}@#{hashed_key_hex}"
+		"#{nickname}@#{hashed_key}"
 	end
 
 	def nickname
@@ -240,7 +240,7 @@ class Peer < EventMachine::Connection
 			return
 		end
 		send_action :received_public_key, nil
-		puts "Read #{peer_info_s}'s public key: #{hashed_key_hex}"
+		puts "Read #{peer_info_s}'s public key: #{hashed_key}"
 
 		send_deck_info if has_identified
 	end
@@ -383,6 +383,7 @@ class Peer < EventMachine::Connection
 			puts "EVERYONE IS READY, LETS GO"
 			@@accepting_peers=false
 			puts "No longer accepting new peers because game is in progress"
+			game_start
 		else
 			puts "not all peers are ready, or I'm not ready =("
 		end
@@ -396,8 +397,29 @@ class Peer < EventMachine::Connection
 	def self.has_peers
 		@@peers.length!=0
 	end
+	def self.game_start 
+		hashed_keys=@@peers.map { |peer| peer.hashed_key }
+		hashed_keys << Game.instance.local_id
+		hashed_keys.sort!
+		hashed_keys=hashed_keys.join ','
+		puts "Joined: #{hashed_keys}"
+		@@groupRandomSeed = Digest::SHA256.hexdigest(hashed_keys)
+		localRand=@@groupRandomSeed + ',' + Game.instance.local_id
+		@@localRandomSeed = Digest::SHA256.hexdigest(localRand)
+		puts "grouprandomseed: #{@@groupRandomSeed}"
+		puts "localRand: #{localRand}"
+		puts "localRandomSeed: #{@@localRandomSeed}"
+		whiteCardsPRNG=prng_from_string(@@groupRandomSeed+"whiteCards")
+		deck=Game.instance.deck
+		puts "Prev white cards: #{deck.white_cards}"
+		@@shuffledWhiteCards=deck.white_cards.shuffle(random: whiteCardsPRNG)
+		puts "Shuffled: #{@@shuffledWhiteCards}"
+	end
 end
-
+def shuff
+def prng_from_string(seed_str)
+	Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
+end
 Game.instance # initialize everything
 def connect_to_peer(ip)
 	EM::connect ip, 54484, Peer if ip
