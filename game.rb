@@ -434,7 +434,7 @@ class Peer < EventMachine::Connection
 		end
 		i=0
 		loop do
-			rnd=Digest::SHA256.hexdigest(rand_str)
+			rnd=SecureRandom.hex
 			cardIndex=@@localRandomSeed + ','+rnd + ','+i.to_s
 			puts cardIndex
 			cardIndex=int_from_str cardIndex
@@ -453,16 +453,13 @@ class Peer < EventMachine::Connection
 		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
 		puts "myHand: #{@@myHand}"
 		@@cardNonce=Array.new(numCards){ |i|
-			Digest::SHA256.hexdigest(rand_str)
+			SecureRandom.hex
 		}
 		@@hashedCard=Arary.new(numCards){ |i|
 			Digest::SHA256.hexdigest(@@myHandIndexes[i] + ',' + @@cardNonce[i])
 		}
 		puts "hashedCard: #{@@hashedCard}"
 	end
-end
-def rand_str
-	(0...50).map { ('a'..'z').to_a[rand(26)] }.join
 end
 def int_from_str(seed_str)
 	(Digest::SHA1.hexdigest(seed_str).to_i(16))
