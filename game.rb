@@ -428,6 +428,7 @@ class Peer < EventMachine::Connection
 		if mySeg.size<numCards
 			numCards=mySeg.size
 		end
+		i=0
 		loop do
 			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i.to_s
 			puts cardIndex
