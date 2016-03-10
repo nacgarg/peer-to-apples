@@ -456,6 +456,7 @@ class Peer < EventMachine::Connection
 		}
 		puts "hashedCard: #{@@hashedCard}"
 		Thread.new do
+			puts "starting main loop thread"
 			Peer.main_loop
 		end
 	end
