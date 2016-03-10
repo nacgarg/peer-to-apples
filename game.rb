@@ -419,10 +419,7 @@ class Peer < EventMachine::Connection
 		puts "judgeOrder: #{@@judge_order}"
 		mySeg=Game.instance.deck.white_segment(@@peers.size+1,@@my_index)
 		puts "mySegment: #{mySeg}"
-		@@myRandom=Array.new(8){|i|
-			Digest::SHA256.hexdigest(rand_str)
-		}
-		puts "myRandom: #{@@myRandom}"
+		@@myRandom=Array.new
 		@@myHandIndexes=Array.new
 		numCards=8
 		if mySeg.size<numCards
@@ -430,18 +427,21 @@ class Peer < EventMachine::Connection
 		end
 		i=0
 		loop do
-			cardIndex=@@localRandomSeed + ','+@@myRandom[i] + ','+i.to_s
+			rnd=Digest::SHA256.hexdigest(rand_str)
+			cardIndex=@@localRandomSeed + ','+rnd + ','+i.to_s
 			puts cardIndex
 			cardIndex=int_from_str cardIndex
 			cardIndex=cardIndex%mySeg.size
 			if @@myHandIndexes.index(cardIndex).nil?
 				@@myHandIndexes<<cardIndex
+				@@myRandom<<rnd
 				i+=1
 				if(i==numCards)
 					break
 				end
 			end
 		end
+		puts "myRandom: #{@@myRandom}"
 		puts "myHandIndexes: #{@@myHandIndexes}"
 		@@myHand=@@myHandIndexes.map {|index| mySeg[index]}
 		puts "myHand: #{@@myHand}"
