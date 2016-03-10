@@ -401,6 +401,8 @@ class Peer < EventMachine::Connection
 		hashed_keys=@@peers.map { |peer| peer.hashed_key }
 		hashed_keys << Game.instance.local_id
 		hashed_keys.sort!
+		@@my_index=hashed_keys.index(Game.instance.local_id)
+		puts "My index: #{@@my_index}"
 		hashed_keys=hashed_keys.join ','
 		puts "Joined: #{hashed_keys}"
 		@@groupRandomSeed = Digest::SHA256.hexdigest(hashed_keys)
