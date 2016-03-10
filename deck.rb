@@ -70,7 +70,7 @@ class Deck
 	end
 
 	def get_hash()
-		Digest::SHA256.digest(serialize()).bytes.each.map { |b| b.to_s(16) }.join
+		Digest::SHA256.hexdigest(serialize())
 	end
 
 	def black_cards()
