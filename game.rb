@@ -430,8 +430,8 @@ class Peer < EventMachine::Connection
 
 		@@myRandom = Array.new
 		@@myHandIndexes=Array.new
-
-		num_cards =  my_segment.size < num_cards ?  my_segment.size : 8
+		num_cards = 8
+		num_cards =  my_segment.size < num_cards ?  my_segment.size : num_cards
 
 		i = 0
 
