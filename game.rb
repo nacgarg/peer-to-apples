@@ -213,6 +213,16 @@ class Peer < EventMachine::Connection
 		@@peers.delete(self)
 		@disconnect_reason ||= possible_reason
 		puts "Connection closed with peer #{peer_info_s} -- reason: '#{@disconnect_reason}'."
+		abort_game if !enough_players?
+	end
+
+	def enough_players?
+		return @@peers.length >= 3
+	end 
+
+	def abort_game
+		puts "Oh no! #{peer_info_s} left the game, and now there aren't enough people to keep going."
+		abort("Aborting...")
 	end
 
 	def reject_connection(reason)
