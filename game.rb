@@ -456,13 +456,11 @@ class Peer < EventMachine::Connection
 		}
 		puts "hashedCard: #{@@hashedCard}"
 		Thread.new do
-			puts "starting main loop thread"
-			puts "threads don't just do the first line"
 			Peer.main_loop
 		end
 	end
 	def self.main_loop
-		puts "in main loop function"
+		puts "starting main loop function"
 		loop do
 			puts "The black card is #{Peer.current_black_card}"
 			card=pick_white_card @@myHand
