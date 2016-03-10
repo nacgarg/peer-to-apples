@@ -65,6 +65,7 @@ end
 
 class Peer < EventMachine::Connection
 	include EM::P::LineProtocol
+	include UI
 
 	GAME_PORT = ARGV[0].nil? ? 54484 : ARGV[0].to_i# class constant
 	@@peers = []
