@@ -78,13 +78,16 @@ module ApplesToPeers
 		def current_black_card
 			deck.black_cards[@round_number % deck.black_cards.size]
 		end
-
-		def game_start 
-			@round_number = 0
-
+		def get_hashed_keys
 			hashed_keys = Peer.peers.map { |peer| peer.player_id }
 			hashed_keys << local_id
 			hashed_keys.sort!
+			hashed_keys
+		end
+		def game_start 
+			@round_number = 0
+
+			hashed_keys=get_hashed_keys
 
 			@my_index = hashed_keys.index(local_id)
 			puts "We are index #{@my_index} of `hashed_keys`."
@@ -231,9 +234,7 @@ module ApplesToPeers
 				puts "I WON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 				@my_num_wins+=1
 			else
-				hashed_keys = Peer.peers.map { |peer| peer.player_id }
-				hashed_keys << local_id
-				hashed_keys.sort!
+				hashed_keys = get_hashed_keys
 				winnerHash=hashed_keys[segment_index]
 				#puts "Winner hash: #{winnerHash}"
 				blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
@@ -283,9 +284,7 @@ module ApplesToPeers
 			end
 			segment_index=deck_segment_from_card deck.white_cards[cardIndex.to_i]
 			puts "segment index: #{segment_index}"
-			hashed_keys = Peer.peers.map { |peer| peer.player_id }
-			hashed_keys << local_id
-			hashed_keys.sort!
+			hashed_keys = get_hashed_keys
 			if hashed_keys[segment_index]!=fromId
 				per=peer_from_id(fromId)
 				100.times { puts "#{per.nickname} IS CHEATING" }
