@@ -210,6 +210,7 @@ module ApplesToPeers
 			@judge_decision.each {|cardIndex|
 				puts "I'm trying to get the #{cardIndex} th element of an array of length #{deck.white_cards.size}, but ruby won't let me. you see it won't print out the next line"
 				thisCard=deck.white_cards[cardIndex]
+				puts "this doesn't print out"
 				puts "Card: #{thisCard}"
 			}
 			puts ""
