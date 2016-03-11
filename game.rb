@@ -205,11 +205,12 @@ module ApplesToPeers
 				puts "Waiting"
 				sleep 1
 			end
+			puts ""
 			puts "Here were the cards submitted, with the winner first"
 			@judge_decision.each {|card|
-				puts card
+				puts deck.white_cards[card]
 			}
-			puts "okay"
+			puts ""
 			winner=@judge_decision[0]
 			segment_index=nil
 			deck.white_segments.each_index { |index|
