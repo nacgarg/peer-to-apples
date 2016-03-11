@@ -177,6 +177,9 @@ module ApplesToPeers
 			judge=judges[0]
 			judge.send_card_choice(deck.white_cards.index card)
 		end
+		def received_card_choice(cardIndex, fromId)
+
+		end
 	end
 
 	class Peer < EventMachine::Connection
@@ -479,6 +482,8 @@ module ApplesToPeers
 				received_peers incoming[:data]
 			when :ready
 				peer_ready
+			when :card_choice
+				Game.instance.received_card_choice(incoming[:data].to_i, player_id)
 			end
 		end
 		def self.check_ready
