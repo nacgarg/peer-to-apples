@@ -225,18 +225,18 @@ module ApplesToPeers
 			puts ""
 			winner=@judge_decision[0].to_i
 			winningCard=deck.white_cards[winner]
-			puts "winner card index: #{winner}"
+			#puts "winner card index: #{winner}"
 			segment_index=nil
 			(Peer.peers.size+1).times{ |index|
 				segment=deck.white_segments(Peer.peers.size+1)[index]
 				numOccurances = segment.count winningCard
-				puts "Segment: #{index} occurances: #{numOccurances}"
+				#puts "Segment: #{index} occurances: #{numOccurances}"
 				if numOccurances!=0
-					puts "Segment #{index} won"
+					#puts "Segment #{index} won"
 					segment_index=index
 				end
 			}
-			5.times {puts ""}
+			2.times {puts ""}
 			if segment_index == @my_index
 				puts "I WON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 				@my_num_wins+=1
