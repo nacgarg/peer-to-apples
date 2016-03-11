@@ -39,14 +39,27 @@ module ApplesToPeers
 		end
 
 		def self.judge_cards(hand)
-			hand.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
-			puts "Type in the number of the card you think should win."
-			input = STDIN.gets.strip.to_i
-			if input <= 0 || input > hand.length
-				puts "Invalid number, try again."
-				return Interface.judge_cards(hand)
+			hand.each_with_index { |card, index| print index == 0 ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
+			index = 0
+			STDOUT.flush
+			while true do
+				input = read_char
+				case input
+				when "\e[D" # Left arrow
+					print "\r"
+					index -= 1
+					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
+					STDOUT.flush
+				when "\e[C" # Right arrow
+					print "\r"
+					index += 1
+					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
+					STDOUT.flush
+				when "\r" # Enter
+					print "\n\n"
+					return hand[index]
+				end
 			end
-			return input-1
 		end
 
 		def self.log(text)
