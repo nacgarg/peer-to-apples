@@ -216,8 +216,8 @@ module ApplesToPeers
 			winner=@judge_decision[0].to_i
 			puts "winner card index: #{winner}"
 			segment_index=nil
-			deck.white_segments.each_index { |index|
-				segment=deck.white_segments[index]
+			deck.white_segments(Peer.peers.size+1).each_index { |index|
+				segment=deck.white_segments(Peer.peers.size+1)[index]
 				if segment.count winner!=0
 					puts "Segment #{index} won"
 					segment_index=index
