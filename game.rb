@@ -474,7 +474,8 @@ module ApplesToPeers
 			send_action :card_choice, cardIndex.to_s
 		end
 		def self.send_judge_decision(cards)
-			@@peers.each{|peer| peer.send_action :judge_decision, cards.join ','}
+			cards=cards.join ','
+			@@peers.each{|peer| peer.send_action :judge_decision, cards}
 		end
 
 		def received_peers(data)
