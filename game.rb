@@ -214,25 +214,29 @@ module ApplesToPeers
 			}
 			puts ""
 			winner=@judge_decision[0].to_i
+			winningCard=deck.white_cards[winner]
 			puts "winner card index: #{winner}"
 			segment_index=nil
-			deck.white_segments(Peer.peers.size+1).each_index { |index|
+			(Peer.peers.size+1).times{ |index|
 				segment=deck.white_segments(Peer.peers.size+1)[index]
-				if segment.count winner!=0
+				numOccurances = segment.count winningCard
+				puts "Segment: #{index} occurances: #{numOccurances}"
+				if numOccurances!=0
 					puts "Segment #{index} won"
 					segment_index=index
 				end
 			}
-			hashed_keys = Peer.peers.map { |peer| peer.player_id }
-			hashed_keys << local_id
-			hashed_keys.sort!
-			winnerHash=hashed_keys[segment_index]
-			puts "Winner hash: #{winnerHash}"
-			blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
-			winnerNick=blah[0].nickname
-			puts "Winner: #{winnerNick}"
 			if segment_index == @my_index
 				puts "I WON"
+			else
+				hashed_keys = Peer.peers.map { |peer| peer.player_id }
+				hashed_keys << local_id
+				hashed_keys.sort!
+				winnerHash=hashed_keys[segment_index]
+				puts "Winner hash: #{winnerHash}"
+				blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
+				winnerNick=blah[0].nickname
+				puts "Winner: #{winnerNick}"
 			end
 		end
 		def check_cards_received
