@@ -214,6 +214,7 @@ module ApplesToPeers
 			}
 			puts ""
 			winner=@judge_decision[0].to_i
+			puts "winner card index: #{winner}"
 			segment_index=nil
 			deck.white_segments.each_index { |index|
 				segment=deck.white_segments[index]
