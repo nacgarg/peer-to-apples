@@ -169,7 +169,7 @@ module ApplesToPeers
 			ind = @myHand.index card
 			puts "You picked card #{card} index #{ind}"
 			puts "Sending to judge #{current_judge}"
-			judges=Peer.peers.select({|peer| peer.player_id == current_judge})
+			judges=Peer.peers.select {|peer| peer.player_id == current_judge}
 			if judges.size==0
 				puts "not connected to judge. lol im done"
 				raise "no"
