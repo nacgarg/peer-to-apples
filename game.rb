@@ -71,6 +71,94 @@ module ApplesToPeers
 			Random.new((Digest::SHA1.hexdigest(seed_str).to_i(16)).to_f)
 		end
 
+		def current_judge
+			@judge_order[@round_number % @judge_order.length]
+		end
+
+		def current_black_card
+			deck.black_cards[@round_number % deck.black_cards.size]
+		end
+
+		def game_start 
+			@round_number = 0
+
+			hashed_keys = Peer.peers.map { |peer| peer.hashed_key }
+			hashed_keys << Game.instance.local_id
+			hashed_keys.sort!
+
+			@my_index = hashed_keys.index(Game.instance.local_id)
+			puts "We are index #{@my_index} of `hashed_keys`."
+
+			hashed_keys_joined = hashed_keys.join ','
+			puts "Hashed keys: #{hashed_keys_joined}"
+
+			@group_random_seed = Digest::SHA256.hexdigest(hashed_keys_joined)
+	    puts "Group random seed is #{@group_random_seed}"
+
+			local_rand_base = @group_random_seed + ',' + Game.instance.local_id
+			@local_random_seed = Digest::SHA256.hexdigest(local_rand_base)
+			puts "Our local random base is #{local_rand_base}, converted to hex: #{@local_random_seed}"
+
+			Game.instance.deck.shuffle(@group_random_seed)
+
+			@judge_order = Peer.peers.map { |peer| peer.hashed_key }
+			@judge_order << Game.instance.local_id
+			@judge_order.sort!
+			@judge_order.shuffle(random: Game.prng_from_string(@group_random_seed + "judgeOrder"))
+			puts "The judge order (of hashed keys) is #{@judge_order}"
+
+			my_segment = Game.instance.deck.white_segment(Peer.peers.size + 1, @my_index)
+			puts "Our segment: #{my_segment}"
+
+			@myRandom = Array.new
+			@myHandIndexes=Array.new
+			num_cards = 8
+			num_cards = [my_segment.size, 8].min
+
+			i = 0
+
+			loop do
+				rnd = SecureRandom.hex
+				cardIndex = @local_random_seed + ',' + rnd + ',' + i.to_s
+				puts cardIndex
+				cardIndex = Game.int_from_str cardIndex
+				cardIndex = cardIndex % my_segment.size
+				if @myHandIndexes.index(cardIndex).nil?
+					@myHandIndexes<<cardIndex
+					@myRandom<<rnd
+					i+=1
+					if(i==num_cards)
+						break
+					end
+				end
+			end
+
+			puts "myRandom: #{@myRandom}"
+			puts "myHandIndexes: #{@myHandIndexes}"
+			@myHand=@myHandIndexes.map {|index| my_segment[index]}
+			puts "myHand: #{@myHand}"
+			@cardNonce=Array.new(num_cards){ |i|
+				SecureRandom.hex
+			}
+			@hashedCard=Array.new(num_cards){ |i|
+				Digest::SHA256.hexdigest(@myHandIndexes[i].to_s + ',' + @cardNonce[i])
+			}
+			puts "hashedCard: #{@hashedCard}"
+			Thread.new do
+				main_loop
+			end
+		end
+		def main_loop
+			puts "starting main loop function"
+			loop do
+				puts "The black card is #{Peer.current_black_card}"
+				card = Interface.pick_white_card @myHand
+				ind = @myhand.index card
+				puts "You picked card #{card} index #{ind}"
+				puts "Sending to judge #{Peer.current_judge}"
+				break
+			end
+		end
 	end
 
 	class Peer < EventMachine::Connection
@@ -94,7 +182,9 @@ module ApplesToPeers
 	  def initialize
 	    @ready = false
 	  end
-
+	  def self.peers
+	  	@@peers
+	  end
 	  attr_reader :ready
 	  attr_reader :nickname
 	  attr_reader :public_key
@@ -372,10 +462,18 @@ module ApplesToPeers
 				peer_ready
 			end
 		end
-
-	  @@me_ready = false
+		def self.check_ready
+			return false unless @@me_ready
+			return false unless has_peers
+			return false if @@peers.any? {|peer| !peer.ready}
+			true
+		end
+		def self.has_peers
+			@@peers.length > 0
+		end
+	    @@me_ready = false
 		def self.set_ready
-			@@peers.each { |peer| peer.send_action :ready, nil }
+			Peer.peers.each { |peer| peer.send_action :ready, nil }
 			@@me_ready = true
 			Peer.on_readiness_update
 		end
@@ -386,107 +484,7 @@ module ApplesToPeers
 			puts "EVERYONE IS READY. LET'S GO!"
 			@@accepting_peers = false
 			puts 'No longer accepting new peers, as the game is now in progress.'
-			game_start
-		end
-
-		def self.check_ready
-			return false unless @@me_ready
-			return false unless has_peers
-			return false if @@peers.any? {|peer| !peer.ready}
-			true
-		end
-
-		def self.has_peers
-			@@peers.length > 0
-		end
-
-		def self.current_judge
-			@@judge_order[@@round_number % @@judge_order.length]
-		end
-
-		def self.current_black_card
-			Game.instance.deck.black_cards[@@round_number % Game.instance.deck.black_cards.size]
-		end
-
-		def self.game_start 
-			@@round_number = 0
-
-			hashed_keys = @@peers.map { |peer| peer.hashed_key }
-			hashed_keys << Game.instance.local_id
-			hashed_keys.sort!
-
-			@@my_index = hashed_keys.index(Game.instance.local_id)
-			puts "We are index #{@@my_index} of `hashed_keys`."
-
-			hashed_keys_joined = hashed_keys.join ','
-			puts "Hashed keys: #{hashed_keys_joined}"
-
-			@@group_random_seed = Digest::SHA256.hexdigest(hashed_keys_joined)
-	    puts "Group random seed is #{@@group_random_seed}"
-
-			local_rand_base = @@group_random_seed + ',' + Game.instance.local_id
-			@@local_random_seed = Digest::SHA256.hexdigest(local_rand_base)
-			puts "Our local random base is #{local_rand_base}, converted to hex: #{@@local_random_seed}"
-
-			Game.instance.deck.shuffle(@@group_random_seed)
-
-			@@judge_order = @@peers.map { |peer| peer.hashed_key }
-			@@judge_order << Game.instance.local_id
-			@@judge_order.sort!
-			@@judge_order.shuffle(random: Game.prng_from_string(@@group_random_seed + "judgeOrder"))
-			puts "The judge order (of hashed keys) is #{@@judge_order}"
-
-			my_segment = Game.instance.deck.white_segment(@@peers.size + 1, @@my_index)
-			puts "Our segment: #{my_segment}"
-
-			@@myRandom = Array.new
-			@@myHandIndexes=Array.new
-			num_cards = 8
-			num_cards = [my_segment.size, 8].min
-
-			i = 0
-
-			loop do
-				rnd = SecureRandom.hex
-				cardIndex = @@local_random_seed + ',' + rnd + ',' + i.to_s
-				puts cardIndex
-				cardIndex = Game.int_from_str cardIndex
-				cardIndex = cardIndex % my_segment.size
-				if @@myHandIndexes.index(cardIndex).nil?
-					@@myHandIndexes<<cardIndex
-					@@myRandom<<rnd
-					i+=1
-					if(i==num_cards)
-						break
-					end
-				end
-			end
-
-			puts "myRandom: #{@@myRandom}"
-			puts "myHandIndexes: #{@@myHandIndexes}"
-			@@myHand=@@myHandIndexes.map {|index| my_segment[index]}
-			puts "myHand: #{@@myHand}"
-			@@cardNonce=Array.new(num_cards){ |i|
-				SecureRandom.hex
-			}
-			@@hashedCard=Array.new(num_cards){ |i|
-				Digest::SHA256.hexdigest(@@myHandIndexes[i].to_s + ',' + @@cardNonce[i])
-			}
-			puts "hashedCard: #{@@hashedCard}"
-			Thread.new do
-				Peer.main_loop
-			end
-		end
-		def self.main_loop
-			puts "starting main loop function"
-			loop do
-				puts "The black card is #{Peer.current_black_card}"
-				card = Interface.pick_white_card @@myHand
-				ind = @@myhand.index card
-				puts "You picked card #{card} index #{ind}"
-				puts "Sending to judge #{Peer.current_judge}"
-				break
-			end
+			Game.instance.game_start
 		end
 	end
 	
