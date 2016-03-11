@@ -24,11 +24,15 @@ module ApplesToPeers
 				when "\e[D" # Left arrow
 					print "\r"
 					index -= 1
+					index+=hand.size
+					index%=hand.size
 					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 					STDOUT.flush
 				when "\e[C" # Right arrow
 					print "\r"
 					index += 1
+					index+=hand.size
+					index%=hand.size
 					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 					STDOUT.flush
 				when "\r" # Enter
@@ -48,11 +52,15 @@ module ApplesToPeers
 				when "\e[D" # Left arrow
 					print "\r"
 					index -= 1
+					index+=hand.size
+					index%=hand.size
 					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 					STDOUT.flush
 				when "\e[C" # Right arrow
 					print "\r"
 					index += 1
+					index+=hand.size
+					index%=hand.size
 					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 					STDOUT.flush
 				when "\r" # Enter
