@@ -213,7 +213,7 @@ module ApplesToPeers
 				puts "#{thisCard}"
 			}
 			puts ""
-			winner=@judge_decision[0]
+			winner=@judge_decision[0].to_i
 			segment_index=nil
 			deck.white_segments.each_index { |index|
 				segment=deck.white_segments[index]
