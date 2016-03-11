@@ -22,10 +22,10 @@ module ApplesToPeers
 				STDOUT.flush
 				input = read_char
 				case input
-				when "\e[B" # Left arrow
+				when "\e[A" # Left arrow
 					print "\r" + ("\e[A\e[K"*hand.size)
 					index -= 1
-				when "\e[A" # Right arrow
+				when "\e[B" # Right arrow
 					print "\r" + ("\e[A\e[K"*hand.size)
 					index += 1
 				when "\r" # Enter
@@ -45,10 +45,10 @@ module ApplesToPeers
 				STDOUT.flush
 				input = read_char
 				case input
-				when "\e[B" # Left arrow
+				when "\e[A" # Left arrow
 					print "\r" + ("\e[A\e[K"*hand.size)
 					index -= 1
-				when "\e[A" # Right arrow
+				when "\e[B" # Right arrow
 					print "\r" + ("\e[A\e[K"*hand.size)
 					index += 1
 				when "\r" # Enter
