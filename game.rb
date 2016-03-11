@@ -161,7 +161,7 @@ module ApplesToPeers
 				else
 					get_card_and_send_to_judge
 				end
-				break
+				@round_number+=1
 			end
 		end
 		def judge_cards
@@ -187,6 +187,7 @@ module ApplesToPeers
 			puts "Okay, sent out your (probably terrible) decision"
 		end
 		def get_card_and_send_to_judge
+			@judge_decision=nil
 			card = Interface.pick_white_card @myHand
 			ind = @myHand.index card
 			puts "You picked card #{card} index #{ind}"
@@ -200,7 +201,34 @@ module ApplesToPeers
 			judge.send_card_choice(deck.white_cards.index card)
 			puts "okay, now waiting for judge to choose a winner"
 			loop do
-
+				break unless @judge_decision.nil?
+				puts "Waiting"
+				sleep 1
+			end
+			puts "Here were the cards submitted, with the winner first"
+			@judge_decision.each {|card|
+				puts card
+			}
+			puts "okay"
+			winner=@judge_decision[0]
+			segment_index=nil
+			deck.white_segments.each_index { |index|
+				segment=deck.white_segments[index]
+				if segment.count winner!=0
+					puts "Segment #{index} won"
+					segment_index=index
+				end
+			}
+			hashed_keys = Peer.peers.map { |peer| peer.player_id }
+			hashed_keys << local_id
+			hashed_keys.sort!
+			winnerHash=hashed_keys[segment_index]
+			puts "Winner hash: #{winnerHash}"
+			blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
+			winnerNick=blah[0].nickname
+			puts "Winner: #{winnerNick}"
+			if segment_index == @my_index
+				puts "I WON"
 			end
 		end
 		def check_cards_received
@@ -219,6 +247,8 @@ module ApplesToPeers
 			puts "ayy #{@card_choices[fromId]}"
 		end
 		def received_judge_decision(data)
+			@judge_decision = data.split ','
+		end
 
 	end
 
