@@ -15,58 +15,48 @@ module ApplesToPeers
 		end
 
 		def self.pick_white_card(hand)
-			hand.each_with_index { |card, index| print index == 0 ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 			index = 0
 			STDOUT.flush
 			while true do
+				hand.each_with_index { |card, ind| puts ind == index ? "\e[47m#{card.text}\e[0m  ": " #{card.text}  " }
+				STDOUT.flush
 				input = read_char
 				case input
-				when "\e[D" # Left arrow
-					print "\r"
+				when "\e[B" # Left arrow
+					print "\r" + ("\e[A\e[K"*hand.size)
 					index -= 1
-					index+=hand.size
-					index%=hand.size
-					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
-					STDOUT.flush
-				when "\e[C" # Right arrow
-					print "\r"
+				when "\e[A" # Right arrow
+					print "\r" + ("\e[A\e[K"*hand.size)
 					index += 1
-					index+=hand.size
-					index%=hand.size
-					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
-					STDOUT.flush
 				when "\r" # Enter
 					print "\n\n"
 					return hand[index]
 				end
+				index+=hand.size
+				index%=hand.size
 			end
 		end
 
 		def self.judge_cards(hand)
-			hand.each_with_index { |card, index| print index == 0 ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
 			index = 0
 			STDOUT.flush
 			while true do
+				hand.each_with_index { |card, ind| puts ind == index ? "\e[47m#{card.text}\e[0m  ": " #{card.text}  " }
+				STDOUT.flush
 				input = read_char
 				case input
-				when "\e[D" # Left arrow
-					print "\r"
+				when "\e[B" # Left arrow
+					print "\r" + ("\e[A\e[K"*hand.size)
 					index -= 1
-					index+=hand.size
-					index%=hand.size
-					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
-					STDOUT.flush
-				when "\e[C" # Right arrow
-					print "\r"
+				when "\e[A" # Right arrow
+					print "\r" + ("\e[A\e[K"*hand.size)
 					index += 1
-					index+=hand.size
-					index%=hand.size
-					hand.each_with_index { |card, ind| print ind == index ? " \e[47m#{card.text}\e[0m  ": " #{card.text}  " }
-					STDOUT.flush
 				when "\r" # Enter
 					print "\n\n"
 					return index
 				end
+				index+=hand.size
+				index%=hand.size
 			end
 		end
 
