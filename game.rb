@@ -20,9 +20,9 @@ module ApplesToPeers
 			@peers = []
 			@local_rsa = OpenSSL::PKey::RSA.new 2048
 			@local_id = Peer.hash_key @local_rsa.public_key
-			@initial_peer = Interface.request_input 'Initial Peer IP? '
+			@initial_peer = Interface.request_input 'To join an existing game, enter the IP of someone on the game. To make a new game, just hit enter > '
 			@local_nickname = Interface.request_input 'Nickname? ', true
-			deck_path = Interface.request_input 'Path to deck? '
+			deck_path = Interface.request_input 'To load a deck from disk, enter the relative path. If you are joining a game, the client will download the deck from them >'
 
 			if !deck_path.nil?
 				@deck = Deck.new
