@@ -82,11 +82,11 @@ module ApplesToPeers
 		def game_start 
 			@round_number = 0
 
-			hashed_keys = Peer.peers.map { |peer| peer.hashed_key }
-			hashed_keys << Game.instance.local_id
+			hashed_keys = Peer.peers.map { |peer| peer.player_id }
+			hashed_keys << local_id
 			hashed_keys.sort!
 
-			@my_index = hashed_keys.index(Game.instance.local_id)
+			@my_index = hashed_keys.index(local_id)
 			puts "We are index #{@my_index} of `hashed_keys`."
 
 			hashed_keys_joined = hashed_keys.join ','
@@ -95,19 +95,19 @@ module ApplesToPeers
 			@group_random_seed = Digest::SHA256.hexdigest(hashed_keys_joined)
 	    puts "Group random seed is #{@group_random_seed}"
 
-			local_rand_base = @group_random_seed + ',' + Game.instance.local_id
+			local_rand_base = @group_random_seed + ',' + local_id
 			@local_random_seed = Digest::SHA256.hexdigest(local_rand_base)
 			puts "Our local random base is #{local_rand_base}, converted to hex: #{@local_random_seed}"
 
-			Game.instance.deck.shuffle(@group_random_seed)
+			deck.shuffle(@group_random_seed)
 
-			@judge_order = Peer.peers.map { |peer| peer.hashed_key }
-			@judge_order << Game.instance.local_id
+			@judge_order = Peer.peers.map { |peer| peer.player_id }
+			@judge_order << local_id
 			@judge_order.sort!
 			@judge_order.shuffle(random: Game.prng_from_string(@group_random_seed + "judgeOrder"))
 			puts "The judge order (of hashed keys) is #{@judge_order}"
 
-			my_segment = Game.instance.deck.white_segment(Peer.peers.size + 1, @my_index)
+			my_segment = deck.white_segment(Peer.peers.size + 1, @my_index)
 			puts "Our segment: #{my_segment}"
 
 			@myRandom = Array.new
@@ -151,13 +151,31 @@ module ApplesToPeers
 		def main_loop
 			puts "starting main loop function"
 			loop do
+				5.times { puts "" }
+				puts "ROUND #{@round_number}"
 				puts "The black card is #{current_black_card}"
-				card = Interface.pick_white_card @myHand
-				ind = @myHand.index card
-				puts "You picked card #{card} index #{ind}"
-				puts "Sending to judge #{current_judge}"
+				judge_id=current_judge
+				if judge_id == local_id
+					puts "YOU ARE THE JUDGE"
+					puts "Waiting for people to pick cards..."
+				else
+					get_card_and_send_to_judge
+				end
 				break
 			end
+		end
+		def get_card_and_send_to_judge
+			card = Interface.pick_white_card @myHand
+			ind = @myHand.index card
+			puts "You picked card #{card} index #{ind}"
+			puts "Sending to judge #{current_judge}"
+			judges=Peer.peers.select({|peer| peer.player_id == current_judge})
+			if judges.size==0
+				puts "not connected to judge. lol im done"
+				raise "no"
+			end
+			judge=judges[0]
+			judge.send_card_choice(deck.white_cards.index card)
 		end
 	end
 
@@ -223,13 +241,9 @@ module ApplesToPeers
 			!@public_key.nil?
 		end
 
-		def hashed_key
-			Peer.hash_key(@public_key) if public_key_known
-		end
-
 		def identifying_name
 			return nil unless has_identified
-			"#{nickname}@#{hashed_key}"
+			"#{nickname}@#{player_id}"
 		end
 
 		def nickname_known
@@ -332,7 +346,7 @@ module ApplesToPeers
 				return
 			end
 			send_action :received_public_key, nil
-			puts "Read #{peer_info_s}'s public key: #{hashed_key}"
+			puts "Read #{peer_info_s}'s public key: #{player_id}"
 
 			send_deck_info if has_identified
 		end
@@ -382,6 +396,11 @@ module ApplesToPeers
 			puts "Peers to send: #{res}"
 			send_action :peers, res
 		end
+
+		def send_card_choice(cardIndex)
+			send_action :card_choice, cardIndex.to_s
+		end
+
 
 		def received_peers(data)
 			puts "Received peers: #{data}."
