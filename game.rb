@@ -157,11 +157,19 @@ module ApplesToPeers
 				judge_id=current_judge
 				if judge_id == local_id
 					puts "YOU ARE THE JUDGE"
-					puts "Waiting for people to pick cards..."
+					judge_cards
 				else
 					get_card_and_send_to_judge
 				end
 				break
+			end
+		end
+		def judge_cards
+			@card_choices=Hash.new
+			loop do
+				info=check_cards_received
+				puts "Waiting for people to pick cards... #{info} still haven't picked"
+				sleep 1
 			end
 		end
 		def get_card_and_send_to_judge
@@ -177,8 +185,20 @@ module ApplesToPeers
 			judge=judges[0]
 			judge.send_card_choice(deck.white_cards.index card)
 		end
+		def check_cards_received
+			Peer.peers.select {|peer|
+				puts "Peer #{peer.player_id}'s choice: #{@card_choices[peer.player_id]}" unless @card_choices[peer.player_id].nil?
+				return @card_choices[peer.player_id].nil?
+			}.map {|peer| peer.nickname}.join ','
+		end
 		def received_card_choice(cardIndex, fromId)
-
+			puts "Received card choice #{cardIndex} from #{fromId}"
+			unless @card_choices[fromId].nil?
+				puts "Someone is revising their choice"
+			end
+			# TODO check if this card index is from their subdeck. if not, they are trying to cheat
+			@card_choices[fromId]=cardIndex
+			puts "ayy #{@card_choices[fromId]}"
 		end
 	end
 
