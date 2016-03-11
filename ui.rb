@@ -83,6 +83,17 @@ module ApplesToPeers
 				STDIN.cooked!
 			return input
 		end
+
+		def self.waiting(msg, &condition)
+			i = 0
+			loop do
+				break unless condition.call
+				print msg + "."*(i%4) + "      \r"
+				STDOUT.flush
+				sleep 0.5
+				i += 1
+			end
+		end
 	end
 
 end

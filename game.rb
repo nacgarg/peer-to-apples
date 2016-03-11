@@ -175,15 +175,7 @@ module ApplesToPeers
 		end
 		def judge_cards
 			@card_choices=Hash.new
-			loop do
-				info=check_cards_received
-				if info.size==0
-					break
-				end
-				info=info.join ','
-				puts "Waiting for people to pick cards... People who still haven't picked: #{info}"
-				sleep 1
-			end
+			Interface.waiting("Waiting for people to pick cards... People who still haven't picked: #{check_cards_received}") { !check_cards_received.size.zero? }
 			puts "everyone has made a decision"
 			cardIndexes=Peer.peers.map {|peer| @card_choices[peer.player_id]}
 			cardContents=cardIndexes.map {|index| deck.white_cards[index]}
@@ -213,11 +205,7 @@ module ApplesToPeers
 			judge=judges[0]
 			judge.send_card_choice(deck.white_cards.index card)
 			puts "okay, now waiting for judge to choose a winner"
-			loop do
-				break unless @judge_decision.nil?
-				puts "Waiting. judge: #{judge.nickname}"
-				sleep 1
-			end
+			Interface.waiting("Waiting for judge: #{judge.nickname}") { @judge_decision.nil? }
 			puts ""
 			puts "Here were the cards submitted, with the winner first"
 			@judge_decision.each {|cardIndex|
