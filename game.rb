@@ -227,17 +227,18 @@ module ApplesToPeers
 					segment_index=index
 				end
 			}
+			5.times {puts ""}
 			if segment_index == @my_index
-				puts "I WON"
+				puts "I WON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 			else
 				hashed_keys = Peer.peers.map { |peer| peer.player_id }
 				hashed_keys << local_id
 				hashed_keys.sort!
 				winnerHash=hashed_keys[segment_index]
-				puts "Winner hash: #{winnerHash}"
+				#puts "Winner hash: #{winnerHash}"
 				blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
 				winnerNick=blah[0].nickname
-				puts "Winner: #{winnerNick}"
+				puts "I didn't win. Winner: #{winnerNick}"
 			end
 		end
 		def check_cards_received
