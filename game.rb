@@ -168,9 +168,23 @@ module ApplesToPeers
 			@card_choices=Hash.new
 			loop do
 				info=check_cards_received
-				puts "Waiting for people to pick cards... #{info} still haven't picked"
+				if info.size==0
+					break
+				end
+				info=info.join ','
+				puts "Waiting for people to pick cards... People who still haven't picked: #{info}"
 				sleep 1
 			end
+			puts "everyone has made a decision"
+			cardIndexes=Peer.peers.map {|peer| @card_choices[peer.player_id]}
+			cardContents=cardIndexes.map {|index| deck.white_cards[index]}
+			card=Interface.judge_cards cardContents
+			puts "You chose #{cardContents[card]}, which is index #{card}, which is actual index #{cardIndexes[card]}"
+			winnerInd=cardIndexes[card]
+			decision=cardIndexes.select {|cardInd| cardInd!=winnerInd}
+			decision.insert(0,winnerInd) # put the winner first
+			Peer.send_judge_decision decision
+			puts "Okay, sent out your (probably terrible) decision"
 		end
 		def get_card_and_send_to_judge
 			card = Interface.pick_white_card @myHand
@@ -184,12 +198,16 @@ module ApplesToPeers
 			end
 			judge=judges[0]
 			judge.send_card_choice(deck.white_cards.index card)
+			puts "okay, now waiting for judge to choose a winner"
+			loop do
+
+			end
 		end
 		def check_cards_received
 			Peer.peers.select {|peer|
 				puts "Peer #{peer.player_id}'s choice: #{@card_choices[peer.player_id]}" unless @card_choices[peer.player_id].nil?
-				return @card_choices[peer.player_id].nil?
-			}.map {|peer| peer.nickname}.join ','
+				@card_choices[peer.player_id].nil?
+			}.map {|peer| peer.nickname}
 		end
 		def received_card_choice(cardIndex, fromId)
 			puts "Received card choice #{cardIndex} from #{fromId}"
@@ -200,6 +218,8 @@ module ApplesToPeers
 			@card_choices[fromId]=cardIndex
 			puts "ayy #{@card_choices[fromId]}"
 		end
+		def received_judge_decision(data)
+
 	end
 
 	class Peer < EventMachine::Connection
@@ -423,7 +443,9 @@ module ApplesToPeers
 		def send_card_choice(cardIndex)
 			send_action :card_choice, cardIndex.to_s
 		end
-
+		def self.send_judge_decision(cards)
+			@@peers.each{|peer| peer.send_action :judge_decision, cards.join ','}
+		end
 
 		def received_peers(data)
 			puts "Received peers: #{data}."
@@ -504,6 +526,8 @@ module ApplesToPeers
 				peer_ready
 			when :card_choice
 				Game.instance.received_card_choice(incoming[:data].to_i, player_id)
+			when :judge_decision 
+				Game.instance.received_judge_decision incoming[:data]
 			end
 		end
 		def self.check_ready

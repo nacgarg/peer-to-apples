@@ -17,20 +17,20 @@ module ApplesToPeers
 			input = STDIN.gets.strip.to_i
 			if input == 0 || input > hand.length
 				puts "Invalid number, try again."
-				return pick_white_card(hand)
+				return Interface.pick_white_card(hand)
 			end
 			return hand[input - 1]
 		end
 
-		def self.judge_pick_card(cards)
-			cards.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
+		def self.judge_cards(hand)
+			hand.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
 			puts "Type in the number of the card you think should win."
 			input = STDIN.gets.strip.to_i
-			if input == 0 || input > cards.length
+			if input == 0 || input > hand.length
 				puts "Invalid number, try again."
-				return pick_black_card(cards)
+				return Interface.judge_cards(hand)
 			end
-			return cards[input - 1]
+			return hand[input - 1]
 		end
 
 	end
