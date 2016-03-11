@@ -244,6 +244,14 @@ module ApplesToPeers
 				puts "I didn't win. Winner: #{winnerNick}"
 				@others_num_wins[winnerHash]+=1
 			end
+			print_leaderboard
+		end
+		def print_leaderboard
+			puts "Leaderboard: "
+			puts "My number wins: #{@my_num_wins}"
+			Peer.peers.each { |peer| 
+				puts "#{peer.nickname} num wins: #{@others_num_wins[peer.player_id]}"
+			}
 		end
 		def check_cards_received
 			Peer.peers.select {|peer|
