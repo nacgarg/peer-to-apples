@@ -153,7 +153,7 @@ module ApplesToPeers
 			loop do
 				puts "The black card is #{current_black_card}"
 				card = Interface.pick_white_card @myHand
-				ind = @myhand.index card
+				ind = @myHand.index card
 				puts "You picked card #{card} index #{ind}"
 				puts "Sending to judge #{current_judge}"
 				break
