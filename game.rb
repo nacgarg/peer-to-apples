@@ -178,6 +178,7 @@ module ApplesToPeers
 			puts "everyone has made a decision"
 			cardIndexes=Peer.peers.map {|peer| @card_choices[peer.player_id]}
 			cardContents=cardIndexes.map {|index| deck.white_cards[index]}
+			puts "Black card: #{current_black_card}"
 			card=Interface.judge_cards cardContents
 			puts "You chose #{cardContents[card]}, which is index #{card}, which is actual index #{cardIndexes[card]}"
 			winnerInd=cardIndexes[card]
