@@ -150,6 +150,8 @@ module ApplesToPeers
 		end
 		def main_loop
 			puts "starting main loop function"
+			@my_num_wins=0
+			@others_num_wins=Hash.new(0)
 			loop do
 				5.times { puts "" }
 				puts "ROUND #{@round_number}"
@@ -230,6 +232,7 @@ module ApplesToPeers
 			5.times {puts ""}
 			if segment_index == @my_index
 				puts "I WON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+				@my_num_wins+=1
 			else
 				hashed_keys = Peer.peers.map { |peer| peer.player_id }
 				hashed_keys << local_id
@@ -239,6 +242,7 @@ module ApplesToPeers
 				blah=Peer.peers.select{|peer| peer.player_id == winnerHash}
 				winnerNick=blah[0].nickname
 				puts "I didn't win. Winner: #{winnerNick}"
+				@others_num_wins[winnerHash]+=1
 			end
 		end
 		def check_cards_received
