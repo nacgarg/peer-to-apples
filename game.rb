@@ -410,7 +410,9 @@ module ApplesToPeers
 
 			@@peers << self
 			puts "Connected to peer #{peer_info_s}."
-			EM.add_timer(1) { send_action :gameserver_release, Game::SERVER_RELEASE } # TODO sketch?
+			EM.add_timer(1) { send_action :gameserver_release, Game::SERVER_RELEASE 
+				send_action :ready, nil if @@me_ready
+			} # TODO sketch?
 		end
 
 		def unbind(possible_reason= "remote/unknown")
