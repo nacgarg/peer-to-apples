@@ -594,6 +594,10 @@ module ApplesToPeers
 			puts 'No longer accepting new peers, as the game is now in progress.'
 			Game.instance.game_start
 		end
+
+		def self.me_ready
+			@@me_ready
+		end
 	end
 	
 	Game.instance # initialize everything
@@ -603,6 +607,15 @@ module ApplesToPeers
 		Game.connect_to_peer(Game.instance.initial_peer)
 
 		puts "Accepting peer connections at :#{Peer::GAME_PORT}"
+		Thread.new do
+			loop do
+				if Peer.me_ready
+					break
+				end
+				puts "hit enter once you are ready for the game to start"
+				sleep 2
+			end
+		end
 		Thread.new do
 			loop do
 				puts "waiting, hit enter once you are ready for the game to start"
