@@ -208,9 +208,11 @@ module ApplesToPeers
 			puts ""
 			puts "Here were the cards submitted, with the winner first"
 			@judge_decision.each {|cardIndex|
-				puts "I'm trying to get the #{cardIndex} th element of an array of length #{deck.white_cards.size}"
+				whiteCards=deck.white_cards
+				puts "#{whiteCards}"
+				puts "I'm trying to get the #{cardIndex} th element of an array (previous line) of length #{whiteCards.size}"
 				puts "but ruby won't let me. you see it won't print out the next line"
-				thisCard=deck.white_cards[cardIndex]
+				thisCard=whiteCards[cardIndex]
 				puts "this doesn't print out"
 				puts "Card: #{thisCard}"
 			}
