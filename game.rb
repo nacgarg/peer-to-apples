@@ -154,6 +154,8 @@ module ApplesToPeers
 			@others_num_wins=Hash.new(0)
 			loop do
 				5.times { puts "" }
+				print_leaderboard
+				2.times { puts "" }
 				puts "ROUND #{@round_number}"
 				puts "The black card is #{current_black_card}"
 				judge_id=current_judge
@@ -163,6 +165,7 @@ module ApplesToPeers
 				else
 					get_card_and_send_to_judge
 				end
+
 				@round_number+=1
 			end
 		end
@@ -182,6 +185,9 @@ module ApplesToPeers
 			cardContents=cardIndexes.map {|index| deck.white_cards[index]}
 			puts "Black card: #{current_black_card}"
 			card=Interface.judge_cards cardContents
+			winnerPeer=Peer.peers[card]
+			puts "Winner: #{winnerPeer.nickname}"
+			@others_num_wins[winnerPeer.player_id]+=1
 			puts "You chose #{cardContents[card]}, which is index #{card}, which is actual index #{cardIndexes[card]}"
 			winnerInd=cardIndexes[card]
 			decision=cardIndexes.select {|cardInd| cardInd!=winnerInd}
@@ -244,7 +250,6 @@ module ApplesToPeers
 				puts "I didn't win. Winner: #{winnerNick}"
 				@others_num_wins[winnerHash]+=1
 			end
-			print_leaderboard
 		end
 		def print_leaderboard
 			puts "Leaderboard: "
