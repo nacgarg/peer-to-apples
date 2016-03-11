@@ -208,7 +208,7 @@ module ApplesToPeers
 			puts ""
 			puts "Here were the cards submitted, with the winner first"
 			@judge_decision.each {|card|
-				puts deck.white_cards[card]
+				puts "Index #{card}: #{deck.white_cards[card]}"
 			}
 			puts ""
 			winner=@judge_decision[0]
