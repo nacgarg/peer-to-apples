@@ -225,17 +225,7 @@ module ApplesToPeers
 			puts ""
 			winner=@judge_decision[0].to_i
 			winningCard=deck.white_cards[winner]
-			#puts "winner card index: #{winner}"
-			segment_index=nil
-			(Peer.peers.size+1).times{ |index|
-				segment=deck.white_segments(Peer.peers.size+1)[index]
-				numOccurances = segment.count winningCard
-				#puts "Segment: #{index} occurances: #{numOccurances}"
-				if numOccurances!=0
-					#puts "Segment #{index} won"
-					segment_index=index
-				end
-			}
+			segment_index=deck_segment_from_card winningCard
 			2.times {puts ""}
 			if segment_index == @my_index
 				puts "I WON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -259,12 +249,26 @@ module ApplesToPeers
 			@myRandom.delete_at indexInHand
 			deal_into_hand
 		end
+		def deck_segment_from_card(winningCard)
+			segment_index=nil
+			(Peer.peers.size+1).times{ |index|
+				segment=deck.white_segments(Peer.peers.size+1)[index]
+				numOccurances = segment.count winningCard
+				if numOccurances!=0
+					segment_index=index
+				end
+			}
+			segment_index
+		end
 		def print_leaderboard
 			puts "Leaderboard: "
 			puts "My number wins: #{@my_num_wins}"
 			Peer.peers.each { |peer| 
 				puts "#{peer.nickname} num wins: #{@others_num_wins[peer.player_id]}"
 			}
+		end
+		def peer_from_id(id)
+			(Peer.peers.select {|peer| peer.player_id==id})[0]
 		end
 		def check_cards_received
 			Peer.peers.select {|peer|
@@ -277,7 +281,16 @@ module ApplesToPeers
 			unless @card_choices[fromId].nil?
 				puts "Someone is revising their choice"
 			end
-			# TODO check if this card index is from their subdeck. if not, they are trying to cheat
+			segment_index=deck_segment_from_card deck.white_cards[cardIndex.to_i]
+			puts "segment index: #{segment_index}"
+			hashed_keys = Peer.peers.map { |peer| peer.player_id }
+			hashed_keys << local_id
+			hashed_keys.sort!
+			if hashed_keys[segment_index]!=fromId
+				per=peer_from_id(fromId)
+				100.times { puts "#{per.nickname} IS CHEATING" }
+				return
+			end
 			@card_choices[fromId]=cardIndex
 			puts "ayy #{@card_choices[fromId]}"
 		end
