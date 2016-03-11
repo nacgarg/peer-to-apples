@@ -57,7 +57,7 @@ module ApplesToPeers
 					STDOUT.flush
 				when "\r" # Enter
 					print "\n\n"
-					return hand[index]
+					return index
 				end
 			end
 		end
