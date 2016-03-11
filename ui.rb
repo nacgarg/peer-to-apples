@@ -15,7 +15,7 @@ module ApplesToPeers
 			hand.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
 			puts "Type in the number of the card you want to play."
 			input = STDIN.gets.strip.to_i
-			if input == 0 || input > hand.length
+			if input <= 0 || input > hand.length
 				puts "Invalid number, try again."
 				return Interface.pick_white_card(hand)
 			end
@@ -26,11 +26,11 @@ module ApplesToPeers
 			hand.each_with_index { |card, index| puts "#{index+1}: #{card.text}" }
 			puts "Type in the number of the card you think should win."
 			input = STDIN.gets.strip.to_i
-			if input == 0 || input > hand.length
+			if input <= 0 || input > hand.length
 				puts "Invalid number, try again."
 				return Interface.judge_cards(hand)
 			end
-			return hand[input - 1]
+			return input-1
 		end
 
 	end
