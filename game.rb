@@ -133,7 +133,7 @@ module ApplesToPeers
 			loop do
 				rnd = SecureRandom.hex
 				cardIndex = @local_random_seed + ',' + rnd + ',' + @myHandIndexes.size.to_s
-				puts cardIndex
+				#puts cardIndex
 				cardIndex = Game.int_from_str cardIndex
 				cardIndex = cardIndex % my_segment.size
 				if @myHandIndexes.index(cardIndex).nil?
@@ -640,7 +640,8 @@ module ApplesToPeers
 				if Peer.me_ready
 					break
 				end
-				puts "hit enter once you are ready for the game to start"
+				prs=Peer.peers.map {|peer| peer.nickname}.join ','
+				puts "hit enter once you are ready for the game to start. currently connected to #{prs}"
 				sleep 2
 			end
 		end
