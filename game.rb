@@ -112,9 +112,24 @@ module ApplesToPeers
 
 			@myRandom = Array.new
 			@myHandIndexes=Array.new
-			num_cards = 8
-			num_cards = [my_segment.size, 8].min
+			@myHand=Array.new
+			@cardNonce=Array.new
+			@hashedCard=Array.new
+			@num_cards = 8
+			@num_cards = [my_segment.size, 8].min
 
+			deal_into_hand
+
+			puts "myRandom: #{@myRandom}"
+			puts "myHandIndexes: #{@myHandIndexes}"
+			puts "myHand: #{@myHand}"
+			puts "hashedCard: #{@hashedCard}"
+			Thread.new do
+				main_loop
+			end
+		end
+		def deal_into_hand
+			my_segment = deck.white_segment(Peer.peers.size + 1, @my_index)
 			loop do
 				rnd = SecureRandom.hex
 				cardIndex = @local_random_seed + ',' + rnd + ',' + @myHandIndexes.size.to_s
@@ -123,26 +138,15 @@ module ApplesToPeers
 				cardIndex = cardIndex % my_segment.size
 				if @myHandIndexes.index(cardIndex).nil?
 					@myHandIndexes<<cardIndex
+					@myHand<<my_segment[cardIndex]
 					@myRandom<<rnd
-					if(@myHandIndexes.size==num_cards)
+					cn=SecureRandom.hex
+					@cardNonce<<cn
+					@hashedCard<<Digest::SHA256.hexdigest(cardIndex.to_s + ',' + cn)
+					if(@myHandIndexes.size==@num_cards)
 						break
 					end
 				end
-			end
-
-			puts "myRandom: #{@myRandom}"
-			puts "myHandIndexes: #{@myHandIndexes}"
-			@myHand=@myHandIndexes.map {|index| my_segment[index]}
-			puts "myHand: #{@myHand}"
-			@cardNonce=Array.new(num_cards){ |i|
-				SecureRandom.hex
-			}
-			@hashedCard=Array.new(num_cards){ |i|
-				Digest::SHA256.hexdigest(@myHandIndexes[i].to_s + ',' + @cardNonce[i])
-			}
-			puts "hashedCard: #{@hashedCard}"
-			Thread.new do
-				main_loop
 			end
 		end
 		def main_loop
@@ -195,8 +199,8 @@ module ApplesToPeers
 		def get_card_and_send_to_judge
 			@judge_decision=nil
 			card = Interface.pick_white_card @myHand
-			ind = @myHand.index card
-			puts "You picked card #{card} index #{ind}"
+			indexInHand = @myHand.index card
+			puts "You picked card #{card} index #{indexInHand}"
 			puts "Sending to judge #{current_judge}"
 			judges=Peer.peers.select {|peer| peer.player_id == current_judge}
 			if judges.size==0
@@ -247,6 +251,13 @@ module ApplesToPeers
 				puts "I didn't win. Winner: #{winnerNick}"
 				@others_num_wins[winnerHash]+=1
 			end
+			@myRandom.delete_at indexInHand
+			@myHand.delete_at indexInHand
+			@myHandIndexes.delete_at indexInHand
+			@cardNonce.delete_at indexInHand
+			@hashedCard.delete_at indexInHand
+			@myRandom.delete_at indexInHand
+			deal_into_hand
 		end
 		def print_leaderboard
 			puts "Leaderboard: "
