@@ -115,19 +115,16 @@ module ApplesToPeers
 			num_cards = 8
 			num_cards = [my_segment.size, 8].min
 
-			i = 0
-
 			loop do
 				rnd = SecureRandom.hex
-				cardIndex = @local_random_seed + ',' + rnd + ',' + i.to_s
+				cardIndex = @local_random_seed + ',' + rnd + ',' + @myHandIndexes.size.to_s
 				puts cardIndex
 				cardIndex = Game.int_from_str cardIndex
 				cardIndex = cardIndex % my_segment.size
 				if @myHandIndexes.index(cardIndex).nil?
 					@myHandIndexes<<cardIndex
 					@myRandom<<rnd
-					i+=1
-					if(i==num_cards)
+					if(@myHandIndexes.size==num_cards)
 						break
 					end
 				end
