@@ -151,11 +151,11 @@ module ApplesToPeers
 		def main_loop
 			puts "starting main loop function"
 			loop do
-				puts "The black card is #{Peer.current_black_card}"
+				puts "The black card is #{current_black_card}"
 				card = Interface.pick_white_card @myHand
 				ind = @myhand.index card
 				puts "You picked card #{card} index #{ind}"
-				puts "Sending to judge #{Peer.current_judge}"
+				puts "Sending to judge #{current_judge}"
 				break
 			end
 		end
