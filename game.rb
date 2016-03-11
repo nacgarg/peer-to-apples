@@ -212,7 +212,7 @@ module ApplesToPeers
 			puts "okay, now waiting for judge to choose a winner"
 			loop do
 				break unless @judge_decision.nil?
-				puts "Waiting"
+				puts "Waiting. judge: #{judge.nickname}"
 				sleep 1
 			end
 			puts ""
